@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>    
+    <string name="app_name">HdmiSwitch</string>
+    <string name="title_text_str">Hdmi Switch</string>
+    <string name="hdmi_state_str1">Hdmi Connected</string>
+    <string name="hdmi_state_str2">Hdmi Disconnected</string>
+    
+    <string name="mode_str_panel">PANEL</string>
+    <string name="mode_str_480i">HDMI 480i</string>
+    <string name="mode_str_480p">HDMI 480p</string>
+    <string name="mode_str_576i">HDMI 576i</string>
+    <string name="mode_str_576p">HDMI 576p</string>
+    <string name="mode_str_720p">HDMI 720p</string>
+    <string name="mode_str_1080i">HDMI 1080i</string>
+    <string name="mode_str_1080p">HDMI 1080p</string>
+    
+</resources>
