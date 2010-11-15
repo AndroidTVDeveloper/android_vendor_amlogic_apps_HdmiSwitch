@@ -478,5 +478,60 @@ public class HdmiSwitch extends Activity {
 		MODE_AXIS_TABLE.put("1080i", "560 300 800 480 560 300 18 18");
 		MODE_AXIS_TABLE.put("1080p", "560 300 800 480 560 300 18 18");
 	}
+	
+	/** fastSwitch func for amlplayer*/
+	public static int fastSwitch() {		
+        /* check driver interface */        
+        File file = new File(HdmiSwitch.DISP_CAP_PATH);
+        if (!file.exists()) {        	
+        	return 0;
+        }
+        file = new File(HdmiSwitch.MODE_PATH);
+        if (!file.exists()) {        	
+        	return 0;
+        }
+        file = new File(HdmiSwitch.AXIS_PATH);
+        if (!file.exists()) {        	
+        	return 0;
+        }	
+        
+        /* panel <-> TV*/
+        if (getCurMode().equals("panel")) {  
+        	String mode = getBestMode();
+        	if (mode != null)
+        		setMode(mode);
+        	return 1;
+        } else {
+        	setMode("panel");
+        	return 1;
+        }   
+	}
+	/** get the best mode */
+    private static String getBestMode() {
+    	List<String> list = new ArrayList<String>();    	
+    	String modeStr;
+   	
+    	try {
+    		BufferedReader reader = new BufferedReader(new FileReader(DISP_CAP_PATH), 256);
+    		try {
+    			while ((modeStr = reader.readLine()) != null) {
+    				modeStr = modeStr.split("\\*")[0]; //720p* to 720p
+    				
+    				if (MODE_STR_TABLE.containsKey(modeStr))
+    					list.add(modeStr);	
+    			}
+    		} finally {
+    			reader.close();
+    		}   
+    		
+    	} catch (IOException e) { 
+    		Log.e(TAG, "IO Exception when read: " + DISP_CAP_PATH, e);    		
+    	}    	
+    	
+    	if (list.size() > 0) {    		
+    		return list.get(list.size() - 1);
+    	} else
+    		return null;
+    }
     
 }
