@@ -15,6 +15,7 @@
 		<receiver android:name=".HdmiBroadcastReceiver">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED"/>
+				<action android:name="com.amlogic.HdmiSwitch.FAST_SWITCH"/>
 			</intent-filter>
 		</receiver>
 		<service android:name=".HdmiCheckService" />
