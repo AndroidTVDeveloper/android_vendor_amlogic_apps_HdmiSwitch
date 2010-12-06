@@ -463,12 +463,12 @@ public class HdmiSwitch extends Activity {
 	private static final Map<String, String> MODE_AXIS_TABLE = new HashMap<String, String>();
 	static {
 		MODE_STR_TABLE.put("panel", R.string.mode_str_panel);
-		MODE_STR_TABLE.put("480i", R.string.mode_str_480i);
+		//MODE_STR_TABLE.put("480i", R.string.mode_str_480i);
 		MODE_STR_TABLE.put("480p", R.string.mode_str_480p);
-		MODE_STR_TABLE.put("576i", R.string.mode_str_576i);
+		//MODE_STR_TABLE.put("576i", R.string.mode_str_576i);
 		MODE_STR_TABLE.put("576p", R.string.mode_str_576p);
 		MODE_STR_TABLE.put("720p", R.string.mode_str_720p);
-		MODE_STR_TABLE.put("1080i", R.string.mode_str_1080i);
+		//MODE_STR_TABLE.put("1080i", R.string.mode_str_1080i);
 		MODE_STR_TABLE.put("1080p", R.string.mode_str_1080p);		
 		
 		MODE_AXIS_TABLE.put("panel", "0 0 800 480 0 0 18 18");
