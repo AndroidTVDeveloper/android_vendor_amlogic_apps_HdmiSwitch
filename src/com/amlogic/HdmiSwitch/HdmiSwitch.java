@@ -309,10 +309,11 @@ public class HdmiSwitch extends Activity {
     	list.add("panel");     	
     	
     	//list.add("480i");
-    	//list.add("480p");
-    	//list.add("720p");
+    	list.add("480p");
+    	list.add("720p");
     	//list.add("1080i");
-    	//list.add("1080p");     	
+    	list.add("1080p");    
+    	/* 	
     	try {
     		BufferedReader reader = new BufferedReader(new FileReader(DISP_CAP_PATH), 256);
     		try {
@@ -329,7 +330,7 @@ public class HdmiSwitch extends Activity {
     	} catch (IOException e) { 
     		Log.e(TAG, "IO Exception when read: " + DISP_CAP_PATH, e);    		
     	}    	
-    	
+    	*/
     	return list;
     }
 
