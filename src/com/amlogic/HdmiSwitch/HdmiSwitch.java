@@ -39,9 +39,16 @@ public class HdmiSwitch extends Activity {
 	
 	private static final String TAG = "HdmiSwitch";
 	
+    static {
+    	System.loadLibrary("hdmiswitchjni");
+    }
+	public native static int scaleFrameBufferJni(int flag);	
+	
 	public static final String DISP_CAP_PATH = "/sys/class/amhdmitx/amhdmitx0/disp_cap";
 	public static final String MODE_PATH = "/sys/class/display/mode";
 	public static final String AXIS_PATH = "/sys/class/display/axis";
+	public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
+	public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
 	
 	private static final int CONFIRM_DIALOG_ID = 0;
 	private static final int MAX_PROGRESS = 15;
@@ -368,7 +375,17 @@ public class HdmiSwitch extends Activity {
     			writer.write(modeStr + "\r\n");    			
     		} finally {
     			writer.close();
-    		}  
+    		} 
+    		
+    		//do 2x scale only for 1080p
+    		if (modeStr.equals("1080p")) {
+    			if (setScale("0x10001") == 0)
+    				scaleFrameBufferJni(1);
+    		}
+    		else {
+    			setScale("0x00000");
+    			scaleFrameBufferJni(0);    			
+    		}
     		
     		setAxis(MODE_AXIS_TABLE.get(modeStr));
     		
@@ -396,6 +413,46 @@ public class HdmiSwitch extends Activity {
         		Log.e(TAG, "IO Exception when write: " + AXIS_PATH, e);
         		return 1;
         	}    	
+    }
+    
+    /** set scale*/
+    public static int setScale(String scaleStr) {
+        File file = new File(SCALE_FB0_PATH);
+        if (!file.exists()) {        	
+        	return 1;
+        }   
+        file = new File(SCALE_FB1_PATH);
+        if (!file.exists()) {        	
+        	return 1;
+        }
+    	
+    	try {
+        	BufferedWriter writer = new BufferedWriter(new FileWriter(SCALE_FB0_PATH), 32);
+        		try {
+        			writer.write(scaleStr + "\r\n");
+        		} finally {
+        			writer.close();
+        		}   
+
+            	try {
+                	writer = new BufferedWriter(new FileWriter(SCALE_FB1_PATH), 32);
+                		try {
+                			writer.write(scaleStr + "\r\n");
+                		} finally {
+                			writer.close();
+                		}    		
+                		return 0;
+                		
+                	} catch (IOException e) { 
+                		Log.e(TAG, "IO Exception when write: " + SCALE_FB1_PATH, e);
+                		return 1;
+                	} 
+        		
+        	} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when write: " + SCALE_FB0_PATH, e);
+        		return 1;
+        	}         	
+         	
     }
     
     /** process handler */
@@ -479,7 +536,8 @@ public class HdmiSwitch extends Activity {
 		MODE_AXIS_TABLE.put("576p", "0 48 800 480 0 48 18 18");
 		MODE_AXIS_TABLE.put("720p", "240 120 800 480 240 120 18 18");
 		MODE_AXIS_TABLE.put("1080i", "560 300 800 480 560 300 18 18");
-		MODE_AXIS_TABLE.put("1080p", "560 300 800 480 560 300 18 18");
+		//MODE_AXIS_TABLE.put("1080p", "560 300 800 480 560 300 18 18");
+		MODE_AXIS_TABLE.put("1080p", "160 60 1600 960 160 60 36 36");	//2x scale	
 	}
 	
 	/** fastSwitch func for amlplayer*/
