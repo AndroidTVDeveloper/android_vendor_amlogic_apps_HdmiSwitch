@@ -40,7 +40,7 @@ import android.widget.TextView;
 public class HdmiSwitch extends Activity {
 	
 	private static final String TAG = "HdmiSwitch";
-	private PowerManager.WakeLock mWakeLock;
+	private static PowerManager.WakeLock mWakeLock;
 	
     static {
     	System.loadLibrary("hdmiswitchjni");
@@ -146,10 +146,7 @@ public class HdmiSwitch extends Activity {
 					if (!getCurMode().equals("panel"))
 						showDialog(CONFIRM_DIALOG_ID);
 						
-		    		if (getCurMode().equals("panel")) 
-		    			mWakeLock.release();
-		    		else 
-		    			mWakeLock.acquire();
+
 				}
 				
 			}        	
@@ -398,6 +395,16 @@ public class HdmiSwitch extends Activity {
     		}
     		
     		setAxis(MODE_AXIS_TABLE.get(modeStr));
+    		
+    		//set WakeLock
+    		if (getCurMode().equals("panel")) {
+    			if (mWakeLock.isHeld())
+    				mWakeLock.release();    				
+    		}
+    		else {
+    			if (!mWakeLock.isHeld())
+    				mWakeLock.acquire();    				
+    		}
     		
     		return 0;
     		
