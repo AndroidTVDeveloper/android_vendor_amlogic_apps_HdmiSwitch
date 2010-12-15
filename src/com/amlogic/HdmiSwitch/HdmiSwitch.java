@@ -14,11 +14,13 @@ import java.util.Map;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -38,6 +40,7 @@ import android.widget.TextView;
 public class HdmiSwitch extends Activity {
 	
 	private static final String TAG = "HdmiSwitch";
+	private PowerManager.WakeLock mWakeLock;
 	
     static {
     	System.loadLibrary("hdmiswitchjni");
@@ -75,6 +78,8 @@ public class HdmiSwitch extends Activity {
         setContentView(R.layout.main);
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_layout); 
         
+		PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
+		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         /* set window size */
         WindowManager wm = getWindowManager();
         Display display = wm.getDefaultDisplay();
@@ -140,6 +145,10 @@ public class HdmiSwitch extends Activity {
 					
 					if ((String)item.get("mode") != "panel")
 						showDialog(CONFIRM_DIALOG_ID);
+		    		if (getCurMode().equals("panel")) 
+		    			mWakeLock.release();
+		    		else 
+		    			mWakeLock.acquire();
 				}
 				
 			}        	

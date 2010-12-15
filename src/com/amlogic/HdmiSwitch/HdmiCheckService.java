@@ -6,18 +6,20 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Log;
-import android.widget.TextView;
+import android.os.PowerManager;
 
 
 public class HdmiCheckService extends Service {
-    
+	private static final String TAG = "HdmiCheckService";
     // Use a layout id for a unique identifier
     private static final int HDMI_NOTIFICATIONS = R.layout.main;
+    
+    private PowerManager.WakeLock mWakeLock;
     
     private NotificationManager mNM;
     private Handler mProgressHandler;    
@@ -44,6 +46,8 @@ public class HdmiCheckService extends Service {
         if (!file.exists()) {        	
         	return;
         }
+		PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
+		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         
         /* hdmi check handler */
         mProgressHandler = new HdmiCheckHandler(); 
@@ -108,6 +112,8 @@ public class HdmiCheckService extends Service {
                             R.string.hdmi_state_str2);
                 	
                 	mNM.cancel(HDMI_NOTIFICATIONS);                  	
+                	
+                	mWakeLock.release();
              	}
              }
              /* check per 3s */
