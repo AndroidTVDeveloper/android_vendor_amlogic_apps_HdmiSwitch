@@ -47,7 +47,7 @@ public class HdmiCheckService extends Service {
         	return;
         }
 		PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
-		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+		mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
         
         /* hdmi check handler */
         mProgressHandler = new HdmiCheckHandler(); 
@@ -113,7 +113,7 @@ public class HdmiCheckService extends Service {
                 	
                 	mNM.cancel(HDMI_NOTIFICATIONS);                  	
                 	
-                	mWakeLock.release();
+                	//mWakeLock.release();
              	}
              }
              /* check per 3s */
