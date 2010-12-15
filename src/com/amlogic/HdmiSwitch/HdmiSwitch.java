@@ -143,8 +143,9 @@ public class HdmiSwitch extends Activity {
 					setMode((String)item.get("mode"));			
 					updateListDisplay();					
 					
-					if ((String)item.get("mode") != "panel")
+					if (!getCurMode().equals("panel"))
 						showDialog(CONFIRM_DIALOG_ID);
+						
 		    		if (getCurMode().equals("panel")) 
 		    			mWakeLock.release();
 		    		else 
