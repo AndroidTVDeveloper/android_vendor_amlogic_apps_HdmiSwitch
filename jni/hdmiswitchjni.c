@@ -27,9 +27,11 @@ int scaleFb0(int flag) {
 			
 		}
 		if(ioctl(fd, FBIOPUT_VSCREENINFO, &vinfo1) == 0) {
+			close(fd);
 			return 0;
 		}
 	}
+	close(fd);
 	return -1;	
 }
 
@@ -52,9 +54,11 @@ int scaleFb1(int flag) {
 
 		}
 		if(ioctl(fd, FBIOPUT_VSCREENINFO, &vinfo2) == 0) {
+			close(fd);
 			return 0;
 		}
 	}
+	close(fd);
 	return -1;	
 }
 
