@@ -40,18 +40,21 @@ import android.widget.TextView;
 public class HdmiSwitch extends Activity {
 	
 	private static final String TAG = "HdmiSwitch";
-	private static PowerManager.WakeLock mWakeLock;
+	//private static PowerManager.WakeLock mWakeLock;
 	
     static {
     	System.loadLibrary("hdmiswitchjni");
     }
-	public native static int scaleFrameBufferJni(int flag);	
+	//public native static int scaleFrameBufferJni(int flag);	
+	public native static int freeScaleSetModeJni(int mode);
+	public native static int DisableFreeScaleJni(int mode);
+	public native static int EnableFreeScaleJni(int mode);
 	
 	public static final String DISP_CAP_PATH = "/sys/class/amhdmitx/amhdmitx0/disp_cap";
 	public static final String MODE_PATH = "/sys/class/display/mode";
 	public static final String AXIS_PATH = "/sys/class/display/axis";
-	public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
-	public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
+	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
+	//public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
 	
 	private static final int CONFIRM_DIALOG_ID = 0;
 	private static final int MAX_PROGRESS = 15;
@@ -78,8 +81,8 @@ public class HdmiSwitch extends Activity {
         setContentView(R.layout.main);
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_layout); 
         
-		PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
-		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+		//PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
+		//mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         /* set window size */
         WindowManager wm = getWindowManager();
         Display display = wm.getDefaultDisplay();
@@ -384,27 +387,40 @@ public class HdmiSwitch extends Activity {
     			writer.close();
     		} 
     		
-    		//do 2x scale only for 1080p
-    		if (modeStr.equals("1080p")) {
-    			if (setScale("0x10001") == 0)
-    				scaleFrameBufferJni(1);
-    		}
-    		else {
-    			setScale("0x00000");
-    			scaleFrameBufferJni(0);    			
-    		}
+    		//do free_scale    		
+    		if (getCurMode().equals("panel"))
+    			freeScaleSetModeJni(0);  
+    		else if (getCurMode().equals("480p"))
+    			freeScaleSetModeJni(1);  
+    		else if (getCurMode().equals("720p"))
+    			freeScaleSetModeJni(2);  
+    		else if (getCurMode().equals("1080i"))
+    			freeScaleSetModeJni(3);  
+    		else if (getCurMode().equals("1080p"))
+    			freeScaleSetModeJni(4);  
     		
-    		setAxis(MODE_AXIS_TABLE.get(modeStr));
     		
-    		//set WakeLock
-    		if (getCurMode().equals("panel")) {
-    			if (mWakeLock.isHeld())
-    				mWakeLock.release();    				
-    		}
-    		else {
-    			if (!mWakeLock.isHeld())
-    				mWakeLock.acquire();    				
-    		}
+//    		//do 2x scale only for 1080p
+//    		if (modeStr.equals("1080p")) {
+//    			if (setScale("0x10001") == 0)
+//    				scaleFrameBufferJni(1);
+//    		}
+//    		else {
+//    			setScale("0x00000");
+//    			scaleFrameBufferJni(0);    			
+//    		}
+//    		
+//    		setAxis(MODE_AXIS_TABLE.get(modeStr));
+//    		
+//    		//set WakeLock
+//    		if (getCurMode().equals("panel")) {
+//    			if (mWakeLock.isHeld())
+//    				mWakeLock.release();    				
+//    		}
+//    		else {
+//    			if (!mWakeLock.isHeld())
+//    				mWakeLock.acquire();    				
+//    		}
     		
     		return 0;
     		
@@ -432,45 +448,45 @@ public class HdmiSwitch extends Activity {
         	}    	
     }
     
-    /** set scale*/
-    public static int setScale(String scaleStr) {
-        File file = new File(SCALE_FB0_PATH);
-        if (!file.exists()) {        	
-        	return 1;
-        }   
-        file = new File(SCALE_FB1_PATH);
-        if (!file.exists()) {        	
-        	return 1;
-        }
-    	
-    	try {
-        	BufferedWriter writer = new BufferedWriter(new FileWriter(SCALE_FB0_PATH), 32);
-        		try {
-        			writer.write(scaleStr + "\r\n");
-        		} finally {
-        			writer.close();
-        		}   
-
-            	try {
-                	writer = new BufferedWriter(new FileWriter(SCALE_FB1_PATH), 32);
-                		try {
-                			writer.write(scaleStr + "\r\n");
-                		} finally {
-                			writer.close();
-                		}    		
-                		return 0;
-                		
-                	} catch (IOException e) { 
-                		Log.e(TAG, "IO Exception when write: " + SCALE_FB1_PATH, e);
-                		return 1;
-                	} 
-        		
-        	} catch (IOException e) { 
-        		Log.e(TAG, "IO Exception when write: " + SCALE_FB0_PATH, e);
-        		return 1;
-        	}         	
-         	
-    }
+//    /** set scale*/
+//    public static int setScale(String scaleStr) {
+//        File file = new File(SCALE_FB0_PATH);
+//        if (!file.exists()) {        	
+//        	return 1;
+//        }   
+//        file = new File(SCALE_FB1_PATH);
+//        if (!file.exists()) {        	
+//        	return 1;
+//        }
+//    	
+//    	try {
+//        	BufferedWriter writer = new BufferedWriter(new FileWriter(SCALE_FB0_PATH), 32);
+//        		try {
+//        			writer.write(scaleStr + "\r\n");
+//        		} finally {
+//        			writer.close();
+//        		}   
+//
+//            	try {
+//                	writer = new BufferedWriter(new FileWriter(SCALE_FB1_PATH), 32);
+//                		try {
+//                			writer.write(scaleStr + "\r\n");
+//                		} finally {
+//                			writer.close();
+//                		}    		
+//                		return 0;
+//                		
+//                	} catch (IOException e) { 
+//                		Log.e(TAG, "IO Exception when write: " + SCALE_FB1_PATH, e);
+//                		return 1;
+//                	} 
+//        		
+//        	} catch (IOException e) { 
+//        		Log.e(TAG, "IO Exception when write: " + SCALE_FB0_PATH, e);
+//        		return 1;
+//        	}         	
+//         	
+//    }
     
     /** process handler */
     private class HdmiSwitchProgressHandler extends Handler {
@@ -625,4 +641,39 @@ public class HdmiSwitch extends Activity {
         menu.add(0, 0, 0, getText(R.string.app_name) + " v" + ver_str);
         return true;
     }    
+    
+    //fix free_scale for video 
+    public static int doBeforePlayVideo() {
+		if (!isHdmiConnected())
+			return 0;
+    	
+    	if (!getCurMode().equals("panel")) {
+    		if (getCurMode().equals("480p"))
+    			DisableFreeScaleJni(1);  
+    		else if (getCurMode().equals("720p"))
+    			DisableFreeScaleJni(2);  
+    		else if (getCurMode().equals("1080i"))
+    			DisableFreeScaleJni(3);  
+    		else if (getCurMode().equals("1080p"))
+    			DisableFreeScaleJni(4);  
+    	}    	
+		return 0;    	
+    }
+    public static int doAfterPlayVideo() {
+		if (!isHdmiConnected())
+			return 0;
+    	
+    	if (!getCurMode().equals("panel")) {
+    		if (getCurMode().equals("480p"))
+    			EnableFreeScaleJni(1);  
+    		else if (getCurMode().equals("720p"))
+    			EnableFreeScaleJni(2);  
+    		else if (getCurMode().equals("1080i"))
+    			EnableFreeScaleJni(3);  
+    		else if (getCurMode().equals("1080p"))
+    			EnableFreeScaleJni(4);  
+    	}    	
+		return 0;   	
+    }    
+    
 }
