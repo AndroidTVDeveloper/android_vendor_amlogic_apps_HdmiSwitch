@@ -9,10 +9,6 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
 		"android.intent.action.BOOT_COMPLETED";
 	private static final String ACTION_FAST_SWITCH =
 		"com.amlogic.HdmiSwitch.FAST_SWITCH";	
-	private static final String ACTION_FREESCALE_BEFORE_VIDEO =
-		"com.amlogic.HdmiSwitch.FREESCALE_BEFORE_VIDEO";	
-	private static final String ACTION_FREESCALE_AFTER_VIDEO =
-		"com.amlogic.HdmiSwitch.FREESCALE_AFTER_VIDEO";		
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -24,12 +20,6 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
 		if (ACTION_FAST_SWITCH.equals(intent.getAction())) {			 
 			HdmiSwitch.fastSwitch();
 		}	
-		if (ACTION_FREESCALE_BEFORE_VIDEO.equals(intent.getAction())) {			 
-			HdmiSwitch.doBeforePlayVideo();
-		}	
-		if (ACTION_FREESCALE_AFTER_VIDEO.equals(intent.getAction())) {			 
-			HdmiSwitch.doAfterPlayVideo();
-		}			
 	}
 	
 }
