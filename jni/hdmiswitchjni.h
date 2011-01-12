@@ -11,6 +11,15 @@ extern "C" {
 JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_scaleFrameBufferJni
   (JNIEnv *, jobject ,jint);
 
+JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleSetModeJni
+  (JNIEnv *, jobject ,jint);
+  
+JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_DisableFreeScaleJni
+  (JNIEnv *, jobject ,jint);  
+  
+JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_EnableFreeScaleJni
+  (JNIEnv *, jobject ,jint);  
+    
 #ifdef __cplusplus
 }
 #endif

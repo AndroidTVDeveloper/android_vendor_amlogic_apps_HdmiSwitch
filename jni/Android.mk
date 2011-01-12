@@ -20,6 +20,6 @@ LOCAL_MODULE    := libhdmiswitchjni
 LOCAL_SRC_FILES := hdmiswitchjni.c
 LOCAL_C_INCLUDES :=$(JNI_H_INCLUDE) 
 
-
+LOCAL_SHARED_LIBRARIES := liblog libcutils
 LOCAL_PRELINK_MODULE := false
 include $(BUILD_SHARED_LIBRARY)

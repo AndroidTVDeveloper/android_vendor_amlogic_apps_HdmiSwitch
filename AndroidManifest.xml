@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.amlogic.HdmiSwitch"
       android:versionCode="1"
-      android:versionName="1.4">
+      android:versionName="1.5">
     <uses-permission android:name="android.permission.WAKE_LOCK" />  
     <application android:icon="@drawable/hdmi_icon" android:label="@string/app_name">
         <activity android:name=".HdmiSwitch"
@@ -17,6 +17,8 @@
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED"/>
 				<action android:name="com.amlogic.HdmiSwitch.FAST_SWITCH"/>
+				<action android:name="com.amlogic.HdmiSwitch.FREESCALE_BEFORE_VIDEO"/>
+				<action android:name="com.amlogic.HdmiSwitch.FREESCALE_AFTER_VIDEO"/>
 			</intent-filter>
 		</receiver>
 		<service android:name=".HdmiCheckService" />
