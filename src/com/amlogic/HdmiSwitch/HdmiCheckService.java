@@ -10,15 +10,16 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.PowerManager;
 
 
 public class HdmiCheckService extends Service {
 	private static final String TAG = "HdmiCheckService";
+	private static final String ACTION_HDMISWITCH_MODE_CHANGED =
+		"com.amlogic.HdmiSwitch.HDMISWITCH_MODE_CHANGED";	
     // Use a layout id for a unique identifier
     private static final int HDMI_NOTIFICATIONS = R.layout.main;
     
-    private PowerManager.WakeLock mWakeLock;
+    //private PowerManager.WakeLock mWakeLock;
     
     private NotificationManager mNM;
     private Handler mProgressHandler;    
@@ -102,8 +103,10 @@ public class HdmiCheckService extends Service {
              	if (hdmi_stat == HDMI_DISCONNECTED) {
              		hdmi_stat_old = hdmi_stat;   
              		
-                 	if (!HdmiSwitch.getCurMode().equals("panel"))
+                 	if (!HdmiSwitch.getCurMode().equals("panel")) {
                  		HdmiSwitch.setMode("panel");
+                 		sendBroadcast( new Intent(ACTION_HDMISWITCH_MODE_CHANGED));
+                 	}
                  	
                  	showNotification(R.drawable.stat_connected,
                             R.string.hdmi_state_str2);
