@@ -40,6 +40,7 @@ import android.widget.TextView;
 public class HdmiSwitch extends Activity {
 	
 	private static final String TAG = "HdmiSwitch";
+	
 	//private static PowerManager.WakeLock mWakeLock;
 	
     static {
@@ -53,6 +54,11 @@ public class HdmiSwitch extends Activity {
 	public static final String DISP_CAP_PATH = "/sys/class/amhdmitx/amhdmitx0/disp_cap";
 	public static final String MODE_PATH = "/sys/class/display/mode";
 	public static final String AXIS_PATH = "/sys/class/display/axis";
+	
+	public static final String CODEC_REG = "/sys/devices/platform/soc-audio/codec_reg";
+	public static final String SPK_MUTE = "12 b063";
+	public static final String SPK_UNMUTE = "12 b073";
+	
 	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
 	//public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
 	
@@ -148,6 +154,8 @@ public class HdmiSwitch extends Activity {
 					
 					if (!getCurMode().equals("panel"))
 						showDialog(CONFIRM_DIALOG_ID);
+					else
+						finish();
 						
 
 				}
@@ -204,7 +212,8 @@ public class HdmiSwitch extends Activity {
                 .setTitle(R.string.dialog_title)
                 .setPositiveButton(R.string.dialog_str_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {   
-                    	mProgress = STOP_PROGRESS;                    	
+                    	mProgress = STOP_PROGRESS;   
+                    	finish();
                         /* User clicked OK so do some stuff */
                     }
                 })
@@ -376,8 +385,7 @@ public class HdmiSwitch extends Activity {
     			return 0;
     	}
     	if (modeStr.equals(getCurMode()))
-    		return 0;
-    	
+    		return 0; 
     	
     	try {
     	BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
@@ -399,6 +407,11 @@ public class HdmiSwitch extends Activity {
     		else if (getCurMode().equals("1080p"))
     			freeScaleSetModeJni(4);  
     		
+    		//do spk_mute/unmute
+    		if (getCurMode().equals("panel"))
+    			setAudio(SPK_UNMUTE);
+    		else
+    			setAudio(SPK_MUTE);    		
     		
 //    		//do 2x scale only for 1080p
 //    		if (modeStr.equals("1080p")) {
@@ -425,7 +438,7 @@ public class HdmiSwitch extends Activity {
     		return 0;
     		
     	} catch (IOException e) { 
-    		Log.e(TAG, "IO Exception when write: " + MODE_PATH, e);
+    		Log.e(TAG, "IO Exception when write: " + MODE_PATH, e);    		
     		return 1;
     	}
     	
@@ -447,6 +460,29 @@ public class HdmiSwitch extends Activity {
         		return 1;
         	}    	
     }
+    
+    /** set Audio*/
+    public static int setAudio(String audioStr) {
+        File file = new File(CODEC_REG);
+        if (!file.exists()) {        
+        	//Log.w(TAG, "File does not exist: " + CODEC_REG);
+        	return 0;  
+        }
+        
+    	try {
+        	BufferedWriter writer = new BufferedWriter(new FileWriter(CODEC_REG), 64);
+        		try {
+        			writer.write(audioStr);        			
+        		} finally {
+        			writer.close();
+        		}    		
+        		return 0;
+        		
+        	} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when write: " + CODEC_REG, e);
+        		return 1;
+        	}    	
+    }    
     
 //    /** set scale*/
 //    public static int setScale(String scaleStr) {
