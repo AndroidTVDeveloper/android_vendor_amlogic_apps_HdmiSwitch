@@ -407,11 +407,11 @@ public class HdmiSwitch extends Activity {
     		else if (getCurMode().equals("1080p"))
     			freeScaleSetModeJni(4);  
     		
-    		//do spk_mute/unmute
-    		if (getCurMode().equals("panel"))
-    			setAudio(SPK_UNMUTE);
-    		else
-    			setAudio(SPK_MUTE);    		
+//    		//do spk_mute/unmute
+//    		if (getCurMode().equals("panel"))
+//    			setAudio(SPK_UNMUTE);
+//    		else
+//    			setAudio(SPK_MUTE);    		
     		
 //    		//do 2x scale only for 1080p
 //    		if (modeStr.equals("1080p")) {
