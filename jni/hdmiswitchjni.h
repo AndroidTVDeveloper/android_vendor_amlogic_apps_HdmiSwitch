@@ -8,9 +8,6 @@
 extern "C" {
 #endif
 
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_scaleFrameBufferJni
-  (JNIEnv *, jobject ,jint);
-
 JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleSetModeJni
   (JNIEnv *, jobject ,jint);
   

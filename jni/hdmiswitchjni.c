@@ -8,124 +8,76 @@
 
 #include "hdmiswitchjni.h"
 
-struct fb_var_screeninfo vinfo1, vinfo2;
-
-int scaleFb0(int flag) {
-	int fd;
-	
-	if((fd = open("/dev/graphics/fb0", O_RDWR)) < 0)
-		return -1;
-		
-	if(ioctl(fd, FBIOGET_VSCREENINFO, &vinfo1) == 0) {
-		if(flag == 1) {
-			vinfo1.xres = 1600;
-			vinfo1.yres = 960;
-	
-		} else {
-			vinfo1.xres = 800;
-			vinfo1.yres = 480;
-			vinfo1.xres_virtual = 800;
-			vinfo1.yres_virtual = 960;
-			
-		}
-		if(ioctl(fd, FBIOPUT_VSCREENINFO, &vinfo1) == 0) {
-			close(fd);
-			return 0;
-		}
-	}
-	close(fd);
-	return -1;	
-}
-
-int scaleFb1(int flag) {
-	int fd;
-	
-	if((fd = open("/dev/graphics/fb1", O_RDWR)) < 0)
-		return -1;
-		
-	if(ioctl(fd, FBIOGET_VSCREENINFO, &vinfo2) == 0) {
-		if(flag == 1) {
-			vinfo2.xres = 36;
-			vinfo2.yres = 36;
-
-		} else {
-			vinfo2.xres = 18;
-			vinfo2.yres = 18;
-			vinfo2.xres_virtual = 18;
-			vinfo2.yres_virtual = 18;			
-
-		}
-		if(ioctl(fd, FBIOPUT_VSCREENINFO, &vinfo2) == 0) {
-			close(fd);
-			return 0;
-		}
-	}
-	close(fd);
-	return -1;	
-}
-
-int scaleFb(int flag) {
-	if((scaleFb0(flag) == 0) && (scaleFb1(flag) == 0))
-		return 0;
-	else
-		return -1;	
-}
-
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_scaleFrameBufferJni( JNIEnv* env,
-                                                  jobject thiz, jint flag )
-{
-    return scaleFb(flag);
-}
-
 #define  FBIOPUT_OSD_FREE_SCALE_ENABLE	0x4504
 #define  FBIOPUT_OSD_FREE_SCALE_WIDTH		0x4505
 #define  FBIOPUT_OSD_FREE_SCALE_HEIGHT	0x4506
-#define  MID_800x480 1
+
+struct fb_var_screeninfo vinfo;
+char daxis_str[32];
 
 int freeScale(int mode) {
 	int fd0, fd1;
 	int fd_daxis, fd_vaxis;
+	int fd_fb;	
+	int osd_width, osd_height;	
 	int ret = -1;
 	
 	//LOGI("freeScale: mode=%d", mode);
 	if((fd0 = open("/dev/graphics/fb0", O_RDWR)) < 0) {
-		//LOGI("open /dev/graphics/fb0 fail.");
-		return -1;
+		LOGI("open /dev/graphics/fb0 fail.");
+		goto exit;
 	}
 	if((fd1 = open("/dev/graphics/fb1", O_RDWR)) < 0) {
-		//LOGI("open /dev/graphics/fb1 fail.");
-		return -1;		
+		LOGI("open /dev/graphics/fb1 fail.");
+		goto exit;		
 	}
 	if((fd_vaxis = open("/sys/class/video/axis", O_RDWR)) < 0) {
-		//LOGI("open /sys/class/video/axis fail.");
-		return -1;		
+		LOGI("open /sys/class/video/axis fail.");
+		goto exit;	
 	}
 		
 	if((fd_daxis = open("/sys/class/display/axis", O_RDWR)) < 0) {
-		//LOGI("open /sys/class/display/axis fail.");
-		return -1;	
+		LOGI("open /sys/class/display/axis fail.");
+		goto exit;	
 	}	
+
+	if((fd_fb = open("/dev/graphics/fb0", O_RDWR)) < 0) {
+		LOGI("open /dev/graphics/fb0 fail.");
+		goto exit;
+	}
 		
-#ifdef MID_800x480
+	memset(daxis_str,0,32);	
+	if(ioctl(fd_fb, FBIOGET_VSCREENINFO, &vinfo) == 0) {
+		osd_width = vinfo.xres;
+		osd_height = vinfo.yres;
+		sprintf(daxis_str, "0 0 %d %d 0 0 18 18", vinfo.xres, vinfo.yres);
+																									
+		//LOGI("osd_width = %d", osd_width);
+		//LOGI("osd_height = %d", osd_height);
+	} else {
+		LOGI("get FBIOGET_VSCREENINFO fail.");
+		goto exit;
+	}
+			
 	switch(mode) {
 		//LOGI("set mid mode=%d", mode);
 
 		case 0:	//panel
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			write(fd_daxis, "0 0 800 480 0 0 18 18", strlen("0 0 800 480 0 0 18 18"));
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			
 			ret = 0;
 			break;	
 		case 1: //480p
 			write(fd_vaxis, "20 10 700 470", strlen("20 10 700 470"));
-			write(fd_daxis, "0 0 800 480 0 0 18 18", strlen("0 0 800 480 0 0 18 18"));
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);	
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height); 
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			
@@ -133,13 +85,13 @@ int freeScale(int mode) {
 			break;
 		case 2: //720p
 			write(fd_vaxis, "40 15 1240 705", strlen("40 15 1240 705"));
-			write(fd_daxis, "0 0 800 480 0 0 18 18", strlen("0 0 800 480 0 0 18 18"));
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);	
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			
@@ -148,13 +100,13 @@ int freeScale(int mode) {
 		case 3: //1080i			
 		case 4: //1080p
 			write(fd_vaxis, "40 20 1880 1060", strlen("40 20 1880 1060"));
-			write(fd_daxis, "0 0 800 480 0 0 18 18", strlen("0 0 800 480 0 0 18 18"));
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);	
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			
@@ -163,65 +115,17 @@ int freeScale(int mode) {
 		default:			
 			break;		
 			
-	}	
-#else		
-	switch(mode) {
-		//LOGI("set mode=%d", mode);
-
-		case 0:	//panel
-
-			ret = 0;
-			break;	
-		case 1: //480p
-			write(fd_vaxis, "20 10 700 470", strlen("20 10 700 470"));
-			write(fd_daxis, "0 0 1200 690 0 0 18 18", strlen("0 0 1200 690 0 0 18 18"));
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,1200);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,690);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,1200);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,690);	
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
-			
-			ret = 0;
-			break;
-		case 2: //720p
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			write(fd_daxis, "40 15 1200 690 40 15 18 18", strlen("40 15 1200 690 40 15 18 18"));
-			
-			ret = 0;
-			break;
-		case 3: //1080i			
-		case 4: //1080p
-			write(fd_vaxis, "40 20 1880 1060", strlen("40 20 1880 1060"));
-			write(fd_daxis, "0 0 1200 690 0 0 18 18", strlen("0 0 1200 690 0 0 18 18"));
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,1200);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,690);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,1200);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,690);	
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
-			
-			ret = 0;
-			break;	
-		default:			
-			break;		
-			
-	}	
-#endif	
+	}
 	
+exit:	
 	close(fd0);
 	close(fd1);
 	close(fd_vaxis);
 	close(fd_daxis);	
+	close(fd_fb);
 	return ret;
 }
 	
-
 
 JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleSetModeJni( JNIEnv * env,
 																									jobject thiz, jint mode )
@@ -232,29 +136,48 @@ JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleSetModeJn
 int DisableFreeScale(int mode) {
 	int fd0, fd1;
 	int fd_daxis, fd_vaxis;
+	int fd_fb;	
+	int osd_width, osd_height;	
 	int ret = -1;
 	
 	//LOGI("DisableFreeScale: mode=%d", mode);	
 	if(mode == 0) return 0;		
 		
 	if((fd0 = open("/dev/graphics/fb0", O_RDWR)) < 0) {
-		//LOGI("open /dev/graphics/fb0 fail.");
-		return -1;
+		LOGI("open /dev/graphics/fb0 fail.");
+		goto exit;
 	}
 	if((fd1 = open("/dev/graphics/fb1", O_RDWR)) < 0) {
-		//LOGI("open /dev/graphics/fb1 fail.");
-		return -1;		
+		LOGI("open /dev/graphics/fb1 fail.");
+		goto exit;	
 	}
 	if((fd_vaxis = open("/sys/class/video/axis", O_RDWR)) < 0) {
-		//LOGI("open /sys/class/video/axis fail.");
-		return -1;		
+		LOGI("open /sys/class/video/axis fail.");
+		goto exit;	
 	}
 		
 	if((fd_daxis = open("/sys/class/display/axis", O_RDWR)) < 0) {
-		//LOGI("open /sys/class/display/axis fail.");
-		return -1;	
+		LOGI("open /sys/class/display/axis fail.");
+		goto exit;
 	}	
 	
+	if((fd_fb = open("/dev/graphics/fb0", O_RDWR)) < 0) {
+		LOGI("open /dev/graphics/fb0 fail.");
+		goto exit;
+	}		
+	
+	memset(daxis_str,0,32);	
+	if(ioctl(fd_fb, FBIOGET_VSCREENINFO, &vinfo) == 0) {
+		osd_width = vinfo.xres;
+		osd_height = vinfo.yres;
+
+		//LOGI("osd_width = %d", osd_width);
+		//LOGI("osd_height = %d", osd_height);
+	} else {
+		LOGI("get FBIOGET_VSCREENINFO fail.");
+		goto exit;
+	}
+		
 	switch(mode) {
 		//LOGI("set mid mode=%d", mode);
 
@@ -263,15 +186,22 @@ int DisableFreeScale(int mode) {
 			break;	
 		case 1: //480p			
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			write(fd_daxis, "0 0 800 480 0 0 18 18", strlen("0 0 800 480 0 0 18 18"));
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);			
+			sprintf(daxis_str, "0 0 %d %d 0 0 18 18", vinfo.xres, vinfo.yres);
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			
 			ret = 0;
 			break;
 		case 2: //720p
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			write(fd_daxis, "240 120 800 480 240 120 18 18", strlen("240 120 800 480 240 120 18 18"));
+			sprintf(daxis_str, "%d %d %d %d %d %d 18 18", (1280 - vinfo.xres)/2, 
+																										(720-vinfo.yres)/2,
+																										vinfo.xres, 
+																										vinfo.yres,
+																										(1280 - vinfo.xres)/2,
+																										(720-vinfo.yres)/2);
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			
 			ret = 0;
 			break;
@@ -279,7 +209,13 @@ int DisableFreeScale(int mode) {
 		case 4: //1080p
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			write(fd_daxis, "560 300 800 480 560 300 18 18", strlen("560 300 800 480 560 300 18 18"));
+			sprintf(daxis_str, "%d %d %d %d %d %d 18 18", (1920 - vinfo.xres)/2, 
+																										(1080-vinfo.yres)/2,
+																										vinfo.xres, 
+																										vinfo.yres,
+																										(1920 - vinfo.xres)/2,
+																										(1080-vinfo.yres)/2);
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			
 			ret = 0;
 			break;	
@@ -287,58 +223,81 @@ int DisableFreeScale(int mode) {
 			break;					
 	}	
 	
+exit:	
 	close(fd0);
 	close(fd1);
 	close(fd_vaxis);
-	close(fd_daxis);		
+	close(fd_daxis);	
+	close(fd_fb);	
 	return ret;
+
 }
 
 int EnableFreeScale(int mode) {
 	int fd0, fd1;
 	int fd_daxis, fd_vaxis;
+	int fd_fb;	
+	int osd_width, osd_height;	
 	int ret = -1;
 	
 	//LOGI("EnableFreeScale: mode=%d", mode);	
 	if(mode == 0) return 0;		
 		
 	if((fd0 = open("/dev/graphics/fb0", O_RDWR)) < 0) {
-		//LOGI("open /dev/graphics/fb0 fail.");
-		return -1;
+		LOGI("open /dev/graphics/fb0 fail.");
+		goto exit;
 	}
 	if((fd1 = open("/dev/graphics/fb1", O_RDWR)) < 0) {
-		//LOGI("open /dev/graphics/fb1 fail.");
-		return -1;		
+		LOGI("open /dev/graphics/fb1 fail.");
+		goto exit;	
 	}
 	if((fd_vaxis = open("/sys/class/video/axis", O_RDWR)) < 0) {
-		//LOGI("open /sys/class/video/axis fail.");
-		return -1;		
+		LOGI("open /sys/class/video/axis fail.");
+		goto exit;		
 	}
 		
 	if((fd_daxis = open("/sys/class/display/axis", O_RDWR)) < 0) {
-		//LOGI("open /sys/class/display/axis fail.");
-		return -1;	
+		LOGI("open /sys/class/display/axis fail.");
+		goto exit;
 	}		
 	
+	if((fd_fb = open("/dev/graphics/fb0", O_RDWR)) < 0) {
+		LOGI("open /dev/graphics/fb0 fail.");
+		goto exit;
+	}
+		
+	memset(daxis_str,0,32);	
+	if(ioctl(fd_fb, FBIOGET_VSCREENINFO, &vinfo) == 0) {
+		osd_width = vinfo.xres;
+		osd_height = vinfo.yres;
+		sprintf(daxis_str, "0 0 %d %d 0 0 18 18", vinfo.xres, vinfo.yres);
+		
+		//LOGI("osd_width = %d", osd_width);
+		//LOGI("osd_height = %d", osd_height);
+	} else {
+		LOGI("get FBIOGET_VSCREENINFO fail.");
+		goto exit;
+	}
+		
 	switch(mode) {
 		//LOGI("set mid mode=%d", mode);
 
 		case 0:	//panel
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			write(fd_daxis, "0 0 800 480 0 0 18 18", strlen("0 0 800 480 0 0 18 18"));
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			
 			ret = 0;
 			break;	
 		case 1: //480p
 			write(fd_vaxis, "20 10 700 470", strlen("20 10 700 470"));
-			write(fd_daxis, "0 0 800 480 0 0 18 18", strlen("0 0 800 480 0 0 18 18"));
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);	
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height); 
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			
@@ -346,13 +305,13 @@ int EnableFreeScale(int mode) {
 			break;
 		case 2: //720p
 			write(fd_vaxis, "40 15 1240 705", strlen("40 15 1240 705"));
-			write(fd_daxis, "0 0 800 480 0 0 18 18", strlen("0 0 800 480 0 0 18 18"));
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);	
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height); 
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			
@@ -361,13 +320,13 @@ int EnableFreeScale(int mode) {
 		case 3: //1080i			
 		case 4: //1080p
 			write(fd_vaxis, "40 20 1880 1060", strlen("40 20 1880 1060"));
-			write(fd_daxis, "0 0 800 480 0 0 18 18", strlen("0 0 800 480 0 0 18 18"));
+			write(fd_daxis, daxis_str, strlen(daxis_str));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,800);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,480);	
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height); 
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			
@@ -376,12 +335,15 @@ int EnableFreeScale(int mode) {
 		default:			
 			break;					
 	}	
-	
+
+exit:	
 	close(fd0);
 	close(fd1);
 	close(fd_vaxis);
-	close(fd_daxis);		
+	close(fd_daxis);	
+	close(fd_fb);	
 	return ret;
+
 }
 																			
 JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_DisableFreeScaleJni( JNIEnv * env,
