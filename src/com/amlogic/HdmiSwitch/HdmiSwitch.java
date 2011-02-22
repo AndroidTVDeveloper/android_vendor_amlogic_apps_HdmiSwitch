@@ -59,6 +59,8 @@ public class HdmiSwitch extends Activity {
 	public static final String SPK_MUTE = "12 b063";
 	public static final String SPK_UNMUTE = "12 b073";
 	
+	public static final String BRIGHTNESS_PATH = "/sys/devices/platform/aml-bl/backlight/aml-bl/brightness";
+	
 	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
 	//public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
 	
@@ -388,7 +390,13 @@ public class HdmiSwitch extends Activity {
     		return 0; 
     	
     	try {
-    	BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
+    		String briStr = "128";
+    		if (modeStr.equals("panel")) {
+    			briStr = getBrightness();
+    			setBrightness("0");
+    		}
+    		
+    		BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
     		try {
     			writer.write(modeStr + "\r\n");    			
     		} finally {
@@ -396,8 +404,10 @@ public class HdmiSwitch extends Activity {
     		} 
     		
     		//do free_scale    		
-    		if (getCurMode().equals("panel"))
-    			freeScaleSetModeJni(0);  
+    		if (getCurMode().equals("panel")) {
+    			freeScaleSetModeJni(0);      			
+    			setBrightness(briStr);
+    		}
     		else if (getCurMode().equals("480p"))
     			freeScaleSetModeJni(1);  
     		else if (getCurMode().equals("720p"))
@@ -459,8 +469,50 @@ public class HdmiSwitch extends Activity {
         		Log.e(TAG, "IO Exception when write: " + AXIS_PATH, e);
         		return 1;
         	}    	
-    }
+    }    
     
+    /** set brightness*/
+    public static int setBrightness(String briStr) {
+    	//Log.i(TAG, "setBrightness: " + briStr);
+        File file = new File(BRIGHTNESS_PATH);
+        if (!file.exists()) {        	
+        	return 0;
+        }    	
+    	try {
+        	BufferedWriter writer = new BufferedWriter(new FileWriter(BRIGHTNESS_PATH), 32);
+        		try {
+        			writer.write(briStr);
+        		} finally {
+        			writer.close();
+        		}    		
+        		return 0;
+        		
+        	} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when write: " + BRIGHTNESS_PATH, e);
+        		return 1;
+        	}    	
+    }
+	/** get brightness*/
+    public static String getBrightness() {
+    	String briStr = "128";
+        File file = new File(BRIGHTNESS_PATH);
+        if (!file.exists()) {        	
+        	return briStr;
+        }     	
+    	try {
+    		BufferedReader reader = new BufferedReader(new FileReader(BRIGHTNESS_PATH), 32);
+    		try {
+    			briStr = reader.readLine();  
+    		} finally {
+    			reader.close();
+    		}    		
+    		return (briStr == null)? "128" : briStr;   	
+    		
+    	} catch (IOException e) { 
+    		Log.e(TAG, "IO Exception when read: " + BRIGHTNESS_PATH, e);
+    		return "128";
+    	}    	
+    }
     /** set Audio*/
     public static int setAudio(String audioStr) {
         File file = new File(CODEC_REG);
