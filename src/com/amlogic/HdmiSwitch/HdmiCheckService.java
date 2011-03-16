@@ -81,7 +81,18 @@ public class HdmiCheckService extends Service {
         
         mNM.notify(HDMI_NOTIFICATIONS, notification);
     }       
-    
+
+	/** sendTvOutIntent **/
+	private void sendTvOutIntent( boolean plugin ) {
+		Intent intent = new Intent(Intent.ACTION_TVOUT_EVENT);
+		if(plugin){
+			intent.putExtra(Intent.EXTRA_TVOUT_STATE, Intent.EXTRA_TVOUT_STATE_ON );
+		}else{
+        	intent.putExtra(Intent.EXTRA_TVOUT_STATE, Intent.EXTRA_TVOUT_STATE_OFF );
+		}
+        sendBroadcast(intent);
+	}
+	
     /** hdmi check handler */
     private class HdmiCheckHandler extends Handler {
     	 @Override
@@ -97,7 +108,7 @@ public class HdmiCheckService extends Service {
                              R.string.hdmi_state_str1);   
              		
              		/* run HdmiSwitch activity ? */
-             		
+             		sendTvOutIntent(true);
              	}
              } else {            	
              	if (hdmi_stat == HDMI_DISCONNECTED) {
@@ -112,6 +123,7 @@ public class HdmiCheckService extends Service {
                             R.string.hdmi_state_str2);
                 	
                 	mNM.cancel(HDMI_NOTIFICATIONS); 
+					sendTvOutIntent(false);
                 	
              	}
              }
