@@ -2,6 +2,7 @@
 chmod 0777 /sys/class/display/mode
 chmod 0777 /sys/class/display/axis
 
+
 2) for driver API:
 disp_cap: "/sys/class/amhdmitx/amhdmitx0/disp_cap"
 mode: "/sys/class/display/mode"
