@@ -16,6 +16,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Handler;
@@ -152,6 +153,7 @@ public class HdmiSwitch extends Activity {
 				if (item.get("item_img").equals(R.drawable.item_img_unsel)) {					
 					old_mode = getCurMode();
 					setMode((String)item.get("mode"));			
+					notifyModeChanged();
 					updateListDisplay();					
 					
 					if (!getCurMode().equals("panel"))
@@ -224,6 +226,7 @@ public class HdmiSwitch extends Activity {
                     	mProgress = STOP_PROGRESS;                    	
                     	setMode(old_mode);
                     	updateListDisplay();                     	
+                    	notifyModeChanged();
                     	/* User clicked Cancel so do some stuff */                    	
                     }
                 })
@@ -379,6 +382,24 @@ public class HdmiSwitch extends Activity {
     		return "panel";
     	}    	
     }
+    
+	/** sendTvOutIntent **/
+	private void sendTvOutIntent( boolean plugin ) {
+		Intent intent = new Intent(Intent.ACTION_TVOUT_EVENT);
+		if(plugin){
+			intent.putExtra(Intent.EXTRA_TVOUT_STATE, Intent.EXTRA_TVOUT_STATE_ON );
+		}else{
+        	intent.putExtra(Intent.EXTRA_TVOUT_STATE, Intent.EXTRA_TVOUT_STATE_OFF );
+		}
+        sendBroadcast(intent);
+	}
+	private void notifyModeChanged() {
+		if (getCurMode().equals("panel")) 
+			sendTvOutIntent(false);
+		else
+			sendTvOutIntent(true);
+	}
+	
     /** set mode */
     public static int setMode(String modeStr) {   
     	//Log.i(TAG, "Set mode = " + modeStr);	
@@ -588,6 +609,7 @@ public class HdmiSwitch extends Activity {
                 
                 if (mProgress >= MAX_PROGRESS) {  
                 	setMode(old_mode);
+                	notifyModeChanged();
                 	updateListDisplay(); 
                 	confirm_dialog.dismiss();
                 } else {
@@ -625,8 +647,10 @@ public class HdmiSwitch extends Activity {
                 			confirm_dialog.dismiss();
                 		}
                 		
-                		if (!HdmiSwitch.getCurMode().equals("panel"))
+                		if (!HdmiSwitch.getCurMode().equals("panel")) {
                      		HdmiSwitch.setMode("panel");
+                     		notifyModeChanged();
+                		}
                 		
                 		updateActivityDisplay();
                 	}

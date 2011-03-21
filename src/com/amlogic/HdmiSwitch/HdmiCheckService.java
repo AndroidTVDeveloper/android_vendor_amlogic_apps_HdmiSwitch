@@ -108,7 +108,6 @@ public class HdmiCheckService extends Service {
                              R.string.hdmi_state_str1);   
              		
              		/* run HdmiSwitch activity ? */
-             		sendTvOutIntent(true);
              	}
              } else {            	
              	if (hdmi_stat == HDMI_DISCONNECTED) {
@@ -117,13 +116,13 @@ public class HdmiCheckService extends Service {
                  	if (!HdmiSwitch.getCurMode().equals("panel")) {
                  		HdmiSwitch.setMode("panel");
                  		sendBroadcast( new Intent(ACTION_HDMISWITCH_MODE_CHANGED));
+                 		sendTvOutIntent(false);
                  	}
                  	
                  	showNotification(R.drawable.stat_connected,
                             R.string.hdmi_state_str2);
                 	
                 	mNM.cancel(HDMI_NOTIFICATIONS); 
-					sendTvOutIntent(false);
                 	
              	}
              }
