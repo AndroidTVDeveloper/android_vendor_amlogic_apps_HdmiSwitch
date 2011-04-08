@@ -137,6 +137,15 @@ public class HdmiSwitch extends Activity {
         	tv.setText(getText(R.string.hdmi_state_str1));
         else
         	tv.setText(getText(R.string.hdmi_state_str2));
+
+        /* update hdmi_info_str*/
+        TextView tv2 = (TextView) findViewById(R.id.hdmi_info_str); 
+        if (getCurMode().equals("panel"))
+        	tv2.setVisibility(View.GONE);
+        else {
+        	tv2.setVisibility(View.VISIBLE);
+        	tv2.setText(getText(R.string.hdmi_info_str1));
+        }
         
         /* setup video mode list */
         lv = (ListView) findViewById(R.id.listview); 
@@ -286,6 +295,15 @@ public class HdmiSwitch extends Activity {
  	} 
     /** updateListDisplay */
     private void updateListDisplay() {
+        /* update hdmi_info_str*/
+        TextView tv2 = (TextView) findViewById(R.id.hdmi_info_str); 
+        if (getCurMode().equals("panel"))
+        	tv2.setVisibility(View.GONE);
+        else {
+        	tv2.setVisibility(View.VISIBLE);
+        	tv2.setText(getText(R.string.hdmi_info_str1));
+        } 
+            	
     	Map<String, Object> list_item;
     	for (int i = 0; i < lv.getAdapter().getCount(); i++) {						
 			list_item = (Map<String, Object>)lv.getAdapter().getItem(i);    						
@@ -305,6 +323,15 @@ public class HdmiSwitch extends Activity {
         	tv.setText(getText(R.string.hdmi_state_str1));
         else
         	tv.setText(getText(R.string.hdmi_state_str2));
+        
+        /* update hdmi_info_str*/
+        TextView tv2 = (TextView) findViewById(R.id.hdmi_info_str); 
+        if (getCurMode().equals("panel"))
+        	tv2.setVisibility(View.GONE);
+        else {
+        	tv2.setVisibility(View.VISIBLE);
+        	tv2.setText(getText(R.string.hdmi_info_str1));
+        }        
         
         /* update video mode list */
         lv = (ListView) findViewById(R.id.listview);        

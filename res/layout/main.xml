@@ -15,7 +15,8 @@
     		android:layout_height="wrap_content"    
     		android:src="@drawable/hdmi_img"	
     		/>
-    	<TextView
+
+    	<TextView	
     		android:id="@+id/hdmi_state_str"
     		android:layout_width="fill_parent"
     		android:layout_height="wrap_content"   
@@ -28,7 +29,16 @@
 	<ListView
 		android:id="@+id/listview"
     	android:layout_width="fill_parent"
-    	android:layout_height="fill_parent"		
+    	android:layout_height="wrap_content"		
 		/>
+    <TextView	
+    	android:id="@+id/hdmi_info_str"
+    	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"   
+    	android:gravity="bottom|center" 
+    	android:paddingLeft="10dp"
+    	android:text="@string/hdmi_info_str1"     		
+    	android:textStyle="bold|italic"     		
+    	/>		
 
 </LinearLayout>
