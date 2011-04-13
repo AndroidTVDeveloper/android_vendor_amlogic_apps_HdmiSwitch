@@ -1,3 +1,4 @@
+ifeq ($(BOARD_USE_DEFAULT_HDMISWITCH),true)
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -11,3 +12,4 @@ LOCAL_CERTIFICATE := platform
 LOCAL_JNI_SHARED_LIBRARIES := libhdmiswitchjni
 include $(BUILD_PACKAGE)
 include $(call all-makefiles-under,$(LOCAL_PATH))
+endif
