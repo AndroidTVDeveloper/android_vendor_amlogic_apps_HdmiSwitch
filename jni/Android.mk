@@ -17,6 +17,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := libhdmiswitchjni
+LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := hdmiswitchjni.c
 LOCAL_C_INCLUDES :=$(JNI_H_INCLUDE) 
 
