@@ -60,6 +60,9 @@ public class HdmiSwitch extends Activity {
 	public static final String SPK_MUTE = "12 b063";
 	public static final String SPK_UNMUTE = "12 b073";
 	
+	public static final String DISP_MODE_PATH = "/sys/class/amhdmitx/amhdmitx0/disp_mode";
+	public static final String HDMI_OFF = "aaa";
+	
 	public static final String BRIGHTNESS_PATH = "/sys/devices/platform/aml-bl/backlight/aml-bl/brightness";
 	
 	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
@@ -440,6 +443,7 @@ public class HdmiSwitch extends Activity {
     	try {
     		String briStr = "128";
     		if (modeStr.equals("panel")) {
+    			disableHdmi();
     			briStr = getBrightness();
     			setBrightness("0");
     		}
@@ -501,6 +505,23 @@ public class HdmiSwitch extends Activity {
     	}
     	
     }
+    
+    /** disable Hdmi*/
+    public static int disableHdmi() {
+    	try {
+        	BufferedWriter writer = new BufferedWriter(new FileWriter(DISP_MODE_PATH), 32);
+        		try {
+        			writer.write(HDMI_OFF + "\r\n");
+        		} finally {
+        			writer.close();
+        		}    		
+        		return 0;
+        		
+        	} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when write: " + DISP_MODE_PATH, e);
+        		return 1;
+        	}    	
+    }     
     
     /** set axis*/
     public static int setAxis(String axisStr) {
