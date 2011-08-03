@@ -18,7 +18,8 @@ char daxis_str[32];
 int freeScale(int mode) {
 	int fd0, fd1;
 	int fd_daxis, fd_vaxis;
-	int fd_fb;	
+	int fd_fb;
+	int fd_video;	
 	int osd_width, osd_height;	
 	int ret = -1;
 	
@@ -45,6 +46,10 @@ int freeScale(int mode) {
 		LOGI("open /dev/graphics/fb0 fail.");
 		goto exit;
 	}
+	
+	if((fd_video = open("/sys/class/video/disable_video", O_RDWR)) < 0) {
+		LOGI("open /sys/class/video/disable_video fail.");
+	}	
 		
 	memset(daxis_str,0,32);	
 	if(ioctl(fd_fb, FBIOGET_VSCREENINFO, &vinfo) == 0) {
@@ -77,7 +82,8 @@ int freeScale(int mode) {
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height); 
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);	
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+			if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			
@@ -91,7 +97,8 @@ int freeScale(int mode) {
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);	
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+			if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			
@@ -106,7 +113,8 @@ int freeScale(int mode) {
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);	
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+			if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			
@@ -123,6 +131,7 @@ exit:
 	close(fd_vaxis);
 	close(fd_daxis);	
 	close(fd_fb);
+	close(fd_video);
 	return ret;
 }
 	
