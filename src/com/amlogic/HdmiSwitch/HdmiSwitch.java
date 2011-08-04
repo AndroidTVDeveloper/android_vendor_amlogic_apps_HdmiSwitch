@@ -63,7 +63,7 @@ public class HdmiSwitch extends Activity {
 	public static final String DISP_MODE_PATH = "/sys/class/amhdmitx/amhdmitx0/disp_mode";
 	public static final String HDMI_OFF = "aaa";
 	
-	public static final String BRIGHTNESS_PATH = "/sys/devices/platform/aml-bl/backlight/aml-bl/brightness";
+	public static final String BRIGHTNESS_PATH = "/sys/class/backlight/aml-bl/brightness";
 	
 	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
 	//public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
