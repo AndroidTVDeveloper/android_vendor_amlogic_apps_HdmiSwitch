@@ -64,6 +64,8 @@ public class HdmiSwitch extends Activity {
 	public static final String HDMI_OFF = "aaa";
 	
 	public static final String BRIGHTNESS_PATH = "/sys/class/backlight/aml-bl/brightness";
+	public static final String FB0_BLANK_PATH = "/sys/class/graphics/fb0/blank";	
+	public static final String FB1_BLANK_PATH = "/sys/class/graphics/fb1/blank";
 	
 	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
 	//public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
@@ -444,8 +446,10 @@ public class HdmiSwitch extends Activity {
     		String briStr = "128";
     		if (modeStr.equals("panel")) {
     			disableHdmi();
-    			briStr = getBrightness();
-    			setBrightness("0");
+    			//briStr = getBrightness();
+    			//setBrightness("0");
+    			setFb0Blank("1");
+    			setFb1Blank("1");
     		}
     		
     		BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
@@ -458,7 +462,9 @@ public class HdmiSwitch extends Activity {
     		//do free_scale    		
     		if (getCurMode().equals("panel")) {
     			freeScaleSetModeJni(0);      			
-    			setBrightness(briStr);
+    			//setBrightness(briStr);
+    			setFb0Blank("0");
+    			setFb1Blank("0");
     		}
     		else if (getCurMode().equals("480p"))
     			freeScaleSetModeJni(1);  
@@ -540,6 +546,49 @@ public class HdmiSwitch extends Activity {
         	}    	
     }    
     
+    
+    /** set osd blank*/    
+    private static int setFb0Blank(String blankStr) {
+    	//Log.i(TAG, "setFb0Blank: " + blankStr);
+        File file = new File(FB0_BLANK_PATH);
+        if (!file.exists()) {        	
+        	return 0;
+        }    	
+    	try {
+        	BufferedWriter writer = new BufferedWriter(new FileWriter(FB0_BLANK_PATH), 32);
+        		try {
+        			writer.write(blankStr);
+        		} finally {
+        			writer.close();
+        		}    		
+        		return 0;
+        		
+        	} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when write: " + FB0_BLANK_PATH, e);
+        		return 1;
+        	}    	
+    }
+    private static int setFb1Blank(String blankStr) {
+    	//Log.i(TAG, "setFb1Blank: " + blankStr);
+        File file = new File(FB1_BLANK_PATH);
+        if (!file.exists()) {        	
+        	return 0;
+        }    	
+    	try {
+        	BufferedWriter writer = new BufferedWriter(new FileWriter(FB1_BLANK_PATH), 32);
+        		try {
+        			writer.write(blankStr);
+        		} finally {
+        			writer.close();
+        		}    		
+        		return 0;
+        		
+        	} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when write: " + FB1_BLANK_PATH, e);
+        		return 1;
+        	}    	
+    }    
+        
     /** set brightness*/
     public static int setBrightness(String briStr) {
     	//Log.i(TAG, "setBrightness: " + briStr);
