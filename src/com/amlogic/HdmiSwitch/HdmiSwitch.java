@@ -446,8 +446,8 @@ public class HdmiSwitch extends Activity {
     		String briStr = "128";
     		if (modeStr.equals("panel")) {
     			disableHdmi();
-    			//briStr = getBrightness();
-    			//setBrightness("0");
+    			briStr = getBrightness();
+    			setBrightness("0");
     			setFb0Blank("1");
     			setFb1Blank("1");
     		}
@@ -462,7 +462,7 @@ public class HdmiSwitch extends Activity {
     		//do free_scale    		
     		if (getCurMode().equals("panel")) {
     			freeScaleSetModeJni(0);      			
-    			//setBrightness(briStr);
+    			setBrightness(briStr);
     			setFb0Blank("0");
     			setFb1Blank("0");
     		}
