@@ -114,9 +114,9 @@ public class HdmiCheckService extends Service {
              		hdmi_stat_old = hdmi_stat;   
              		
                  	if (!HdmiSwitch.getCurMode().equals("panel")) {
-                 		HdmiSwitch.setMode("panel");
                  		sendBroadcast( new Intent(ACTION_HDMISWITCH_MODE_CHANGED));
-                 		sendTvOutIntent(false);
+                 		sendTvOutIntent(false);                 		
+                 		HdmiSwitch.setMode("panel");
                  	}
                  	
                  	showNotification(R.drawable.stat_connected,
