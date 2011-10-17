@@ -116,6 +116,13 @@ public class HdmiCheckService extends Service {
                  	if (!HdmiSwitch.getCurMode().equals("panel")) {
                  		sendBroadcast( new Intent(ACTION_HDMISWITCH_MODE_CHANGED));
                  		sendTvOutIntent(false);                 		
+                 		// delay for finish intent              		
+                 		try {
+                 			Thread.currentThread().sleep(1000);
+                 		} catch (InterruptedException e) {
+                 			// TODO Auto-generated catch block
+                 			e.printStackTrace();
+                 		}  
                  		HdmiSwitch.setMode("panel");
                  	}
                  	
