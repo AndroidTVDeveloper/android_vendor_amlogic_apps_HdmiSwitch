@@ -103,7 +103,7 @@ public class HdmiCheckService extends Service {
              if (hdmi_stat_old == HDMI_DISCONNECTED) {            	 
              	if (hdmi_stat == HDMI_CONNECTED) {
              		hdmi_stat_old = hdmi_stat;
-             		
+             		sendBroadcast( new Intent("com.amlogic.HdmiSwitch.HDMI_PLUGIN"));
              		showNotification(R.drawable.stat_connected,
                              R.string.hdmi_state_str1);   
              		
