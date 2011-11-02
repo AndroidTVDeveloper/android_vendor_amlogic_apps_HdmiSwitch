@@ -373,7 +373,7 @@ public class HdmiSwitch extends Activity {
     	list.add("panel");     	
     	
     	//list.add("480i");
-    	if(SystemProperties.getBoolean("ro.hdmi480p.disable", false)){
+    	if(SystemProperties.getBoolean("ro.hdmi480p.enable", true)){
     		list.add("480p");
     	}
     	list.add("720p");
