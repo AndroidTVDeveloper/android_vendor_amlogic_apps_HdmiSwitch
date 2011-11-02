@@ -37,6 +37,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.os.SystemProperties;
 
 public class HdmiSwitch extends Activity {
 	
@@ -372,7 +373,9 @@ public class HdmiSwitch extends Activity {
     	list.add("panel");     	
     	
     	//list.add("480i");
-    	list.add("480p");
+    	if(SystemProperties.getBoolean("ro.hdmi480p.disable", false)){
+    		list.add("480p");
+    	}
     	list.add("720p");
     	//list.add("1080i");
     	list.add("1080p");    
