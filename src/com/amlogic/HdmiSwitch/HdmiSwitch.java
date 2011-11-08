@@ -451,8 +451,7 @@ public class HdmiSwitch extends Activity {
     			disableHdmi();
     			briStr = getBrightness();
     			setBrightness("0");
-    			setFb0Blank("1");
-    			setFb1Blank("1");
+
     		}
     		
     		BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
@@ -466,8 +465,7 @@ public class HdmiSwitch extends Activity {
     		if (getCurMode().equals("panel")) {
     			freeScaleSetModeJni(0);      			
     			setBrightness(briStr);
-    			setFb0Blank("0");
-    			setFb1Blank("0");
+
     		}
     		else if (getCurMode().equals("480p"))
     			freeScaleSetModeJni(1);  
