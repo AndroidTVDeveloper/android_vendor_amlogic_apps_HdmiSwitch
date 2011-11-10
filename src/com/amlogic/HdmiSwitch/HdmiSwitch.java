@@ -68,6 +68,8 @@ public class HdmiSwitch extends Activity {
 	public static final String FB0_BLANK_PATH = "/sys/class/graphics/fb0/blank";	
 	public static final String FB1_BLANK_PATH = "/sys/class/graphics/fb1/blank";
 	
+	public static final String DISABLE_VIDEO_PATH = "/sys/class/video/disable_video";
+	
 	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
 	//public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
 	
@@ -451,7 +453,9 @@ public class HdmiSwitch extends Activity {
     			disableHdmi();
     			briStr = getBrightness();
     			setBrightness("0");
-
+    			setFb0Blank("1");
+    			setFb1Blank("1");
+    			disableVideo(true);
     		}
     		
     		BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
@@ -464,6 +468,9 @@ public class HdmiSwitch extends Activity {
     		//do free_scale    		
     		if (getCurMode().equals("panel")) {
     			freeScaleSetModeJni(0);      			
+    			setFb0Blank("0");
+    			setFb1Blank("0");
+    			disableVideo(false);
     			setBrightness(briStr);
 
     		}
@@ -547,6 +554,30 @@ public class HdmiSwitch extends Activity {
         	}    	
     }    
     
+    /** video layer control */
+    private static int disableVideo(boolean disable) {
+    	//Log.i(TAG, "disableVideo: " + disable);
+        File file = new File(DISABLE_VIDEO_PATH);
+        if (!file.exists()) {        	
+        	return 0;
+        }    	
+    	try {
+        	BufferedWriter writer = new BufferedWriter(new FileWriter(DISABLE_VIDEO_PATH), 32);
+        		try {
+        			if (disable)
+        				writer.write("1");
+        			else
+        				writer.write("2");
+        		} finally {
+        			writer.close();
+        		}    		
+        		return 0;
+        		
+        	} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when write: " + DISABLE_VIDEO_PATH, e);
+        		return 1;
+        	}    	
+    }    
     
     /** set osd blank*/    
     private static int setFb0Blank(String blankStr) {
