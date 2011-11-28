@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-
+import android.util.Log;
 
 public class HdmiCheckService extends Service {
 	private static final String TAG = "HdmiCheckService";

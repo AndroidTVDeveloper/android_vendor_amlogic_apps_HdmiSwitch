@@ -94,9 +94,9 @@ public class HdmiSwitch extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+//        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.main);
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_layout); 
+//        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_layout); 
         
 		//PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
 		//mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -113,13 +113,13 @@ public class HdmiSwitch extends Activity {
         }
         getWindow().setAttributes(lp);        
         
-        /* close button listener */
-        Button btn_close = (Button) findViewById(R.id.title_btn_right);  
-        btn_close.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {				
-				finish();
-			}        	
-        }); 
+//        /* close button listener */
+//        Button btn_close = (Button) findViewById(R.id.title_btn_right);  
+//        btn_close.setOnClickListener(new OnClickListener() {
+//			public void onClick(View v) {				
+//				finish();
+//			}        	
+//        }); 
         
         /* check driver interface */        
         TextView tv = (TextView) findViewById(R.id.hdmi_state_str);        
@@ -146,14 +146,14 @@ public class HdmiSwitch extends Activity {
         else
         	tv.setText(getText(R.string.hdmi_state_str2));
 
-        /* update hdmi_info_str*/
-        TextView tv2 = (TextView) findViewById(R.id.hdmi_info_str); 
-        if (getCurMode().equals("panel"))
-        	tv2.setVisibility(View.GONE);
-        else {
-        	tv2.setVisibility(View.VISIBLE);
-        	tv2.setText(getText(R.string.hdmi_info_str1));
-        }
+//        /* update hdmi_info_str*/
+//        TextView tv2 = (TextView) findViewById(R.id.hdmi_info_str); 
+//        if (getCurMode().equals("panel"))
+//        	tv2.setVisibility(View.GONE);
+//        else {
+//        	tv2.setVisibility(View.VISIBLE);
+//        	tv2.setText(getText(R.string.hdmi_info_str1));
+//        }
         
         /* setup video mode list */
         lv = (ListView) findViewById(R.id.listview); 
@@ -229,7 +229,7 @@ public class HdmiSwitch extends Activity {
         switch (id) {
         case CONFIRM_DIALOG_ID:
         	confirm_dialog =  new AlertDialog.Builder(HdmiSwitch.this)
-                .setIcon(R.drawable.dialog_icon)
+                //.setIcon(R.drawable.dialog_icon)
                 .setTitle(R.string.dialog_title)
                 .setPositiveButton(R.string.dialog_str_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {   
@@ -303,14 +303,14 @@ public class HdmiSwitch extends Activity {
  	} 
     /** updateListDisplay */
     private void updateListDisplay() {
-        /* update hdmi_info_str*/
-        TextView tv2 = (TextView) findViewById(R.id.hdmi_info_str); 
-        if (getCurMode().equals("panel"))
-        	tv2.setVisibility(View.GONE);
-        else {
-        	tv2.setVisibility(View.VISIBLE);
-        	tv2.setText(getText(R.string.hdmi_info_str1));
-        } 
+//        /* update hdmi_info_str*/
+//        TextView tv2 = (TextView) findViewById(R.id.hdmi_info_str); 
+//        if (getCurMode().equals("panel"))
+//        	tv2.setVisibility(View.GONE);
+//        else {
+//        	tv2.setVisibility(View.VISIBLE);
+//        	tv2.setText(getText(R.string.hdmi_info_str1));
+//        } 
             	
     	Map<String, Object> list_item;
     	for (int i = 0; i < lv.getAdapter().getCount(); i++) {						
@@ -332,14 +332,14 @@ public class HdmiSwitch extends Activity {
         else
         	tv.setText(getText(R.string.hdmi_state_str2));
         
-        /* update hdmi_info_str*/
-        TextView tv2 = (TextView) findViewById(R.id.hdmi_info_str); 
-        if (getCurMode().equals("panel"))
-        	tv2.setVisibility(View.GONE);
-        else {
-        	tv2.setVisibility(View.VISIBLE);
-        	tv2.setText(getText(R.string.hdmi_info_str1));
-        }        
+//        /* update hdmi_info_str*/
+//        TextView tv2 = (TextView) findViewById(R.id.hdmi_info_str); 
+//        if (getCurMode().equals("panel"))
+//        	tv2.setVisibility(View.GONE);
+//        else {
+//        	tv2.setVisibility(View.VISIBLE);
+//        	tv2.setText(getText(R.string.hdmi_info_str1));
+//        }        
         
         /* update video mode list */
         lv = (ListView) findViewById(R.id.listview);        
@@ -454,7 +454,6 @@ public class HdmiSwitch extends Activity {
     			briStr = getBrightness();
     			setBrightness("0");
     			setFb0Blank("1");
-    			setFb1Blank("1");
     			disableVideo(true);
     		}
     		
@@ -466,10 +465,10 @@ public class HdmiSwitch extends Activity {
     		} 
     		
     		//do free_scale    		
-    		if (getCurMode().equals("panel")) {
-    			freeScaleSetModeJni(0);      			
+    		if (getCurMode().equals("panel")) { 
+    			setFb0Blank("1");			
+    			freeScaleSetModeJni(0);
     			setFb0Blank("0");
-    			setFb1Blank("0");
     			disableVideo(false);
     			setBrightness(briStr);
 

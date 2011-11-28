@@ -2,13 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.amlogic.HdmiSwitch"
       android:versionCode="1"
-      android:versionName="2.1">
+      android:versionName="4.0">      
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />        
     <uses-permission android:name="android.permission.WAKE_LOCK" />  
     <application android:icon="@drawable/hdmi_icon" android:label="@string/app_name"
     			 android:persistent="true">
         <activity android:name=".HdmiSwitch"
                   android:label="@string/app_name"
-                  android:theme="@android:style/Theme.Dialog">
+                  android:theme="@android:style/Theme.Holo.DialogWhenLarge">
+                  
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />                
@@ -17,13 +19,15 @@
 		<receiver android:name=".HdmiBroadcastReceiver">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED"/>
+				<!--
 				<action android:name="com.amlogic.HdmiSwitch.FAST_SWITCH"/>
 				<action android:name="com.amlogic.HdmiSwitch.FREESCALE_BEFORE_VIDEO"/>
 				<action android:name="com.amlogic.HdmiSwitch.FREESCALE_AFTER_VIDEO"/>
+				-->
 			</intent-filter>
 		</receiver>
 		<service android:name=".HdmiCheckService" />
     </application>
-    <uses-sdk android:minSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="14" />
 
 </manifest> 

@@ -3,11 +3,13 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:padding="10dp"
     >
 	<LinearLayout
     	android:orientation="horizontal"
     	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"    	
+    	android:layout_height="wrap_content" 	
+		android:paddingLeft="10dp"
     	>	
     	<ImageView
     		android:id="@+id/hdmi_img"
@@ -22,14 +24,16 @@
     		android:layout_height="wrap_content"   
     		android:gravity="bottom" 
     		android:paddingLeft="10dp"
+    		android:textSize="16sp"	
     		android:text="@string/hdmi_state_str1"     		
-    		android:textStyle="bold|italic" 		
+    		android:textStyle="bold" 		
     		/>	
 	</LinearLayout>
 	<ListView
 		android:id="@+id/listview"
     	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"		
+    	android:layout_height="wrap_content"
+    	android:paddingTop="5dp" 			
 		/>
     <TextView	
     	android:id="@+id/hdmi_info_str"
@@ -38,7 +42,8 @@
     	android:gravity="bottom|center" 
     	android:paddingLeft="10dp"
     	android:text="@string/hdmi_info_str1"     		
-    	android:textStyle="bold|italic"     		
+    	android:textStyle="bold|italic"   
+    	android:visibility="gone"  		
     	/>		
 
 </LinearLayout>

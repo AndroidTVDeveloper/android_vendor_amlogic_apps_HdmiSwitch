@@ -95,10 +95,14 @@ int freeScale(int mode) {
 
 		case 0:	//panel
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
-			//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
+			//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
+			write(fd_daxis, daxis_str, strlen(daxis_str));				
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			write(fd_daxis, daxis_str, strlen(daxis_str));
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);		
+			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);	
 			if((fd_ppmgr >= 0)&&(find_flag)){
 				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 			}
