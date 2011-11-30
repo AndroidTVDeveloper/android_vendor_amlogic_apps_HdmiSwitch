@@ -2,7 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.amlogic.HdmiSwitch"
       android:versionCode="1"
-      android:versionName="4.0">      
+      android:versionName="4.0"> 
+      
+	<uses-permission android:name="android.permission.BROADCAST_STICKY" />        
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />        
     <uses-permission android:name="android.permission.WAKE_LOCK" />  
     <application android:icon="@drawable/hdmi_icon" android:label="@string/app_name"
@@ -16,18 +18,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />                
             </intent-filter>
         </activity>
-		<receiver android:name=".HdmiBroadcastReceiver">
-			<intent-filter>
-				<action android:name="android.intent.action.BOOT_COMPLETED"/>
-				<!--
-				<action android:name="com.amlogic.HdmiSwitch.FAST_SWITCH"/>
-				<action android:name="com.amlogic.HdmiSwitch.FREESCALE_BEFORE_VIDEO"/>
-				<action android:name="com.amlogic.HdmiSwitch.FREESCALE_AFTER_VIDEO"/>
-				-->
-			</intent-filter>
-		</receiver>
-		<service android:name=".HdmiCheckService" />
+	 <receiver android:name=".HdmiBroadcastReceiver">
+		 <intent-filter>
+			<action android:name="android.intent.action.HDMI_HW_PLUGGED"/>
+		 </intent-filter>
+	 </receiver>
     </application>
-    <uses-sdk android:minSdkVersion="14" />
+    <uses-sdk android:minSdkVersion="14"  android:targetSdkVersion="14" />
 
 </manifest> 

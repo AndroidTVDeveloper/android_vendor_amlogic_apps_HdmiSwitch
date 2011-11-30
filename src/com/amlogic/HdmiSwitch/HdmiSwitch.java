@@ -38,6 +38,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.os.SystemProperties;
+import android.view.WindowManagerPolicy;
 
 public class HdmiSwitch extends Activity {
 	
@@ -421,14 +422,11 @@ public class HdmiSwitch extends Activity {
     }
     
 	/** sendTvOutIntent **/
-	private void sendTvOutIntent( boolean plugin ) {
-		Intent intent = new Intent(Intent.ACTION_TVOUT_EVENT);
-		if(plugin){
-			intent.putExtra(Intent.EXTRA_TVOUT_STATE, Intent.EXTRA_TVOUT_STATE_ON );
-		}else{
-        	intent.putExtra(Intent.EXTRA_TVOUT_STATE, Intent.EXTRA_TVOUT_STATE_OFF );
-		}
-        sendBroadcast(intent);
+	private void sendTvOutIntent( boolean plugged ) {
+
+        Intent intent = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+        intent.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, plugged);
+        sendStickyBroadcast(intent);
 	}
 	private void notifyModeChanged() {
 		if (getCurMode().equals("panel")) 
