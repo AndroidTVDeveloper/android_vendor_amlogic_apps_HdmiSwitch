@@ -29,7 +29,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
 
                 Intent it = new Intent(context, HdmiSwitch.class);
                 it.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                PendingIntent contentIntent = PendingIntent.getBroadcast(context, 0, it, 0);        
+                PendingIntent contentIntent = PendingIntent.getActivity(context, 0, it, 0);        
                 notification.setLatestEventInfo(context, context.getText(R.string.app_name), text, contentIntent);
 
                 nM.notify(HDMI_NOTIFICATIONS, notification);
