@@ -20,6 +20,7 @@
         </activity>
 	 <receiver android:name=".HdmiBroadcastReceiver">
 		 <intent-filter>
+			<action android:name="android.intent.action.BOOT_COMPLETED"/>
 			<action android:name="android.intent.action.HDMI_HW_PLUGGED"/>
 		 </intent-filter>
 	 </receiver>
