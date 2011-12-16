@@ -170,15 +170,23 @@ public class HdmiSwitch extends Activity {
 				Map<String, Object> item = (Map<String, Object>)parent.getItemAtPosition(pos);
 				if (item.get("item_img").equals(R.drawable.item_img_unsel)) {					
 					old_mode = getCurMode();
-					setMode((String)item.get("mode"));			
-					notifyModeChanged();
-					updateListDisplay();					
-					
-					if (!getCurMode().equals("panel"))
-						showDialog(CONFIRM_DIALOG_ID);
-					else
-						finish();
-						
+//					setMode((String)item.get("mode"));							
+//					notifyModeChanged();
+//					updateListDisplay();					
+//					
+//					if (!getCurMode().equals("panel"))
+//						showDialog(CONFIRM_DIALOG_ID);
+//					else
+//						finish();
+			        final String mode = (String)item.get("mode");
+			        new Thread("setMode") {
+			            @Override
+			            public void run() {
+		            		setMode(mode);
+		                    mProgressHandler.sendEmptyMessage(2);
+		                }
+
+			        }.start();  						
 
 				}
 				
@@ -242,9 +250,18 @@ public class HdmiSwitch extends Activity {
                 .setNegativeButton(R.string.dialog_str_cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                     	mProgress = STOP_PROGRESS;                    	
-                    	setMode(old_mode);
-                    	updateListDisplay();                     	
-                    	notifyModeChanged();
+//                    	setMode(old_mode);
+//                    	updateListDisplay();                     	
+//                    	notifyModeChanged();
+				        final String mode = old_mode;
+				        new Thread("setMode") {
+				            @Override
+				            public void run() {
+			            		setMode(mode);
+			                    mProgressHandler.sendEmptyMessage(3);
+			                }
+	
+				        }.start(); 
                     	/* User clicked Cancel so do some stuff */                    	
                     }
                 })
@@ -734,9 +751,19 @@ public class HdmiSwitch extends Activity {
                 	return;                     
                 
                 if (mProgress >= MAX_PROGRESS) {  
-                	setMode(old_mode);
-                	notifyModeChanged();
-                	updateListDisplay(); 
+//                	setMode(old_mode);
+//                	notifyModeChanged();
+//                	updateListDisplay();                 	
+			        final String mode = old_mode;
+			        new Thread("setMode") {
+			            @Override
+			            public void run() {
+		            		setMode(mode);
+		                    mProgressHandler.sendEmptyMessage(3);
+		                }    
+
+			        }.start();                 	
+
                 	confirm_dialog.dismiss();
                 } else {
                     mProgress++;                    
@@ -773,16 +800,33 @@ public class HdmiSwitch extends Activity {
                 			confirm_dialog.dismiss();
                 		}
                 		
-                		if (!HdmiSwitch.getCurMode().equals("panel")) {
-                     		HdmiSwitch.setMode("panel");
-                     		notifyModeChanged();
-                		}
+//                		if (!HdmiSwitch.getCurMode().equals("panel")) {
+//                     		HdmiSwitch.setMode("panel");
+//                     		notifyModeChanged();
+//                		}
                 		
                 		updateActivityDisplay();
                 	}
                 }  
             	mProgressHandler.sendEmptyMessageDelayed(1, 3000); 
             	break;
+            	
+            case 2:		// setMode finish, show confirm dialog
+				notifyModeChanged();
+				updateListDisplay();					
+				
+				if (!getCurMode().equals("panel"))
+					showDialog(CONFIRM_DIALOG_ID);
+				else
+					finish();   
+					         	
+            	break;	
+            	
+            case 3:		// setMode finish
+				notifyModeChanged();
+				updateListDisplay();
+          	
+            	break;            	
             }
         }
     }
