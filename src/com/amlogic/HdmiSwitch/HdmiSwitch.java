@@ -56,6 +56,7 @@ public class HdmiSwitch extends Activity {
 	
 	public static final String DISP_CAP_PATH = "/sys/class/amhdmitx/amhdmitx0/disp_cap";
 	public static final String MODE_PATH = "/sys/class/display/mode";
+	public static final String MODE_PATH_VOUT2 = "/sys/class/display2/mode";	
 	public static final String AXIS_PATH = "/sys/class/display/axis";
 	
 	public static final String CODEC_REG = "/sys/devices/platform/soc-audio/codec_reg";
@@ -389,6 +390,12 @@ public class HdmiSwitch extends Activity {
     private List<String> getAllMode() {
     	List<String> list = new ArrayList<String>();
     	String modeStr;
+    	if (SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
+    	   list.add("480p");
+    	   list.add("720p");
+    	   list.add("1080p"); 
+    	   return list;
+    	}
     	
     	list.add("panel");     	
     	
@@ -423,6 +430,22 @@ public class HdmiSwitch extends Activity {
 	/** get current mode*/
     public static String getCurMode() {
     	String modeStr;
+    	if (SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
+        	try {
+        		BufferedReader reader2 = new BufferedReader(new FileReader(MODE_PATH_VOUT2), 32);
+        		try {
+        			modeStr = reader2.readLine();  
+        		} finally {
+        			reader2.close();
+        		}    		
+        		return (modeStr == null)? "720p" : modeStr;   	
+        		
+        	} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when read: " + MODE_PATH_VOUT2, e);
+        		return "720p";
+        	}    	    
+    	}
+    	
     	try {
     		BufferedReader reader = new BufferedReader(new FileReader(MODE_PATH), 32);
     		try {
@@ -446,6 +469,9 @@ public class HdmiSwitch extends Activity {
         sendStickyBroadcast(intent);
 	}
 	private void notifyModeChanged() {
+	    if (SystemProperties.getBoolean("ro.vout.dualdisplay", false))
+	        return;
+	        
 		if (getCurMode().equals("panel")) 
 			sendTvOutIntent(false);
 		else
@@ -461,6 +487,21 @@ public class HdmiSwitch extends Activity {
     	}
     	if (modeStr.equals(getCurMode()))
     		return 0; 
+    	
+	    if (SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {    		
+    		try {
+    		    BufferedWriter writer2 = new BufferedWriter(new FileWriter(MODE_PATH_VOUT2), 32);
+        		try {
+        			writer2.write(modeStr + "\r\n");    			
+        		} finally {
+        			writer2.close();
+        		}     		
+    		} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when write: " + MODE_PATH_VOUT2, e);    		
+        		return 1;
+    	    }    	        
+	        return 0;
+	    }
     	
     	try {
     		String briStr = "128";
@@ -814,11 +855,12 @@ public class HdmiSwitch extends Activity {
             case 2:		// setMode finish, show confirm dialog
 				notifyModeChanged();
 				updateListDisplay();					
-				
-				if (!getCurMode().equals("panel"))
-					showDialog(CONFIRM_DIALOG_ID);
-				else
-					finish();   
+				if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
+    				if (!getCurMode().equals("panel"))
+    					showDialog(CONFIRM_DIALOG_ID);
+    				else
+    					finish();
+				}   
 					         	
             	break;	
             	

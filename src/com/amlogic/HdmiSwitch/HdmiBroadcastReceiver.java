@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.WindowManagerPolicy;
 
@@ -80,13 +81,14 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
 
                 nM.notify(HDMI_NOTIFICATIONS, notification);
             }else{
-                 if (!HdmiSwitch.getCurMode().equals("panel")) {
-                    HdmiSwitch.setMode("panel");
-                    Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
-                    it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
-                    context.sendStickyBroadcast(it);
+                 if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
+                     if (!HdmiSwitch.getCurMode().equals("panel")) {
+                        HdmiSwitch.setMode("panel");
+                        Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+                        it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
+                        context.sendStickyBroadcast(it);
+                     }
                  }
-                
                  NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
                  nM.cancel(HDMI_NOTIFICATIONS); 
             }
