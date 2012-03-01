@@ -37,6 +37,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.os.SystemProperties;
 import android.view.WindowManagerPolicy;
 
@@ -179,6 +180,17 @@ public class HdmiSwitch extends Activity {
 //						showDialog(CONFIRM_DIALOG_ID);
 //					else
 //						finish();
+
+                    if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                        String isCameraBusy = SystemProperties.get("camera.busy", "0");
+                        if (!isCameraBusy.equals("0")) {
+                            Log.w(TAG, "setDualDisplay, camera is busy");
+                            Toast.makeText(HdmiSwitch.this,
+        					    getText(R.string.Toast_msg_camera_busy),
+        					    Toast.LENGTH_LONG).show(); 
+                            return;
+                        }                                                         
+                    }
 			        final String mode = (String)item.get("mode");
 			        new Thread("setMode") {
 			            @Override
@@ -538,6 +550,10 @@ public class HdmiSwitch extends Activity {
     		else if (getCurMode().equals("1080p"))
     			freeScaleSetModeJni(4);  
     		
+            if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                setDualDisplay(!getCurMode().equals("panel"));
+            }    		
+    		
 //    		//do spk_mute/unmute
 //    		if (getCurMode().equals("panel"))
 //    			setAudio(SPK_UNMUTE);
@@ -608,6 +624,50 @@ public class HdmiSwitch extends Activity {
         		return 1;
         	}    	
     }    
+
+    private static final String VIDEO2_CTRL_PATH = "/sys/class/video2/clone";
+    private static final String VFM_CTRL_PATH = "/sys/class/vfm/map";
+    private static int writeSysfs(String path, String val) {
+        if (!new File(path).exists()) {
+            Log.e(TAG, "File not found: " + path);
+            return 1; 
+        }
+        
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path), 64);
+            try {
+                writer.write(val);
+            } finally {
+                writer.close();
+            }    		
+            return 0;
+        		
+        } catch (IOException e) { 
+            Log.e(TAG, "IO Exception when write: " + path, e);
+            return 1;
+        }                 
+    }
+    private static void setDualDisplay(boolean hdmiPlugged) {
+        String isCameraBusy = SystemProperties.get("camera.busy", "0");
+ 
+        if (!isCameraBusy.equals("0")) {
+            Log.w(TAG, "setDualDisplay, camera is busy");
+            return;
+        }    
+        
+        if (hdmiPlugged) {
+            writeSysfs(VIDEO2_CTRL_PATH, "0");
+            writeSysfs(VFM_CTRL_PATH, "rm default_ext");
+            writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
+            writeSysfs(VIDEO2_CTRL_PATH, "1");
+            writeSysfs(MODE_PATH_VOUT2, "null");
+            writeSysfs(MODE_PATH_VOUT2, "panel");
+        } else {
+            writeSysfs(VIDEO2_CTRL_PATH, "0");
+            writeSysfs(VFM_CTRL_PATH, "rm default_ext");
+            writeSysfs(VFM_CTRL_PATH, "add default_ext vdin vm amvideo");
+        }    	
+    }
     
     /** video layer control */
     private static int disableVideo(boolean disable) {
