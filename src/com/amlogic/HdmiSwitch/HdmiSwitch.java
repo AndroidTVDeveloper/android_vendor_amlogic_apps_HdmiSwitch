@@ -627,6 +627,10 @@ public class HdmiSwitch extends Activity {
 
     private static final String VIDEO2_CTRL_PATH = "/sys/class/video2/clone";
     private static final String VFM_CTRL_PATH = "/sys/class/vfm/map";
+    private static final String VIDEO2_FRAME_RATE_PATH = "/sys/module/amvideo2/parameters/clone_frame_rate";
+    private static final String VIDEO2_FRAME_WIDTH_PATH = "/sys/module/amvideo2/parameters/clone_frame_scale_width";
+    private static final String VIDEO2_SCREEN_MODE_PATH = "/sys/class/video2/screen_mode";
+    
     private static int writeSysfs(String path, String val) {
         if (!new File(path).exists()) {
             Log.e(TAG, "File not found: " + path);
@@ -660,6 +664,15 @@ public class HdmiSwitch extends Activity {
             writeSysfs(VFM_CTRL_PATH, "rm default_ext");
             writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
             writeSysfs(VIDEO2_CTRL_PATH, "1");
+
+            if (getCurMode().equals("720p")) {
+                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "640");
+            } else if (getCurMode().equals("1080p")) {
+                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "960");
+            } else {
+                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
+            }
+            writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
             writeSysfs(MODE_PATH_VOUT2, "null");
             writeSysfs(MODE_PATH_VOUT2, "panel");
         } else {
