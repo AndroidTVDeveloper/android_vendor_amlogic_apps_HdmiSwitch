@@ -40,6 +40,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.os.SystemProperties;
 import android.view.WindowManagerPolicy;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 
 public class HdmiSwitch extends Activity {
 	
@@ -549,10 +551,7 @@ public class HdmiSwitch extends Activity {
     			freeScaleSetModeJni(3);  
     		else if (getCurMode().equals("1080p"))
     			freeScaleSetModeJni(4);  
-    		
-            if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
-                setDualDisplay(!getCurMode().equals("panel"));
-            }    		
+ 		
     		
 //    		//do spk_mute/unmute
 //    		if (getCurMode().equals("panel"))
@@ -651,7 +650,7 @@ public class HdmiSwitch extends Activity {
             return 1;
         }                 
     }
-    private static void setDualDisplay(boolean hdmiPlugged) {
+    private void setDualDisplay(boolean hdmiPlugged) {
         String isCameraBusy = SystemProperties.get("camera.busy", "0");
  
         if (!isCameraBusy.equals("0")) {
@@ -672,15 +671,25 @@ public class HdmiSwitch extends Activity {
             } else {
                 writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
             }
-            writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
-            writeSysfs(MODE_PATH_VOUT2, "null");
-            writeSysfs(MODE_PATH_VOUT2, "panel");
+            
+            if (getDualDisplayState() == 1) {
+                writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
+                writeSysfs(MODE_PATH_VOUT2, "null");
+                writeSysfs(MODE_PATH_VOUT2, "panel");
+            }
+                         
+            
         } else {
             writeSysfs(VIDEO2_CTRL_PATH, "0");
             writeSysfs(VFM_CTRL_PATH, "rm default_ext");
             writeSysfs(VFM_CTRL_PATH, "add default_ext vdin vm amvideo");
         }    	
     }
+    
+    private int getDualDisplayState() {
+        return Settings.System.getInt(getContentResolver(),
+                    Settings.System.HDMI_DUAL_DISP, 1);
+    }    
     
     /** video layer control */
     private static int disableVideo(boolean disable) {
@@ -926,6 +935,9 @@ public class HdmiSwitch extends Activity {
             	break;
             	
             case 2:		// setMode finish, show confirm dialog
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                    setDualDisplay(!getCurMode().equals("panel"));
+                }                           
 				notifyModeChanged();
 				updateListDisplay();					
 				if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
@@ -938,6 +950,9 @@ public class HdmiSwitch extends Activity {
             	break;	
             	
             case 3:		// setMode finish
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                    setDualDisplay(!getCurMode().equals("panel"));
+                }                       
 				notifyModeChanged();
 				updateListDisplay();
           	
