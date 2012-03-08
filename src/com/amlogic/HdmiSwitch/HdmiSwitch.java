@@ -665,9 +665,9 @@ public class HdmiSwitch extends Activity {
             writeSysfs(VIDEO2_CTRL_PATH, "1");
 
             if (getCurMode().equals("720p")) {
-                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "640");
+                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "500");
             } else if (getCurMode().equals("1080p")) {
-                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "960");
+                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "800");
             } else {
                 writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
             }
