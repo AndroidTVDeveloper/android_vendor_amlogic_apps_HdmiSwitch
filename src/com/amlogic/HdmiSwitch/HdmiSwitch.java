@@ -691,6 +691,42 @@ public class HdmiSwitch extends Activity {
                     Settings.System.HDMI_DUAL_DISP, 1);
     }    
     
+    public static void setDualDisplayStatic(boolean hdmiPlugged, boolean dualEnabled) {
+        String isCameraBusy = SystemProperties.get("camera.busy", "0");
+ 
+        if (!isCameraBusy.equals("0")) {
+            Log.w(TAG, "setDualDisplay, camera is busy");
+            return;
+        }    
+        
+        if (hdmiPlugged) {
+            writeSysfs(VIDEO2_CTRL_PATH, "0");
+            writeSysfs(VFM_CTRL_PATH, "rm default_ext");
+            writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
+            writeSysfs(VIDEO2_CTRL_PATH, "1");
+
+            if (getCurMode().equals("720p")) {
+                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "500");
+            } else if (getCurMode().equals("1080p")) {
+                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "800");
+            } else {
+                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
+            }
+            
+            if (dualEnabled) {
+                writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
+                writeSysfs(MODE_PATH_VOUT2, "null");
+                writeSysfs(MODE_PATH_VOUT2, "panel");
+            }
+                         
+            
+        } else {
+            writeSysfs(VIDEO2_CTRL_PATH, "0");
+            writeSysfs(VFM_CTRL_PATH, "rm default_ext");
+            writeSysfs(VFM_CTRL_PATH, "add default_ext vdin vm amvideo");
+        }    	
+    }    
+    
     /** video layer control */
     private static int disableVideo(boolean disable) {
     	//Log.i(TAG, "disableVideo: " + disable);

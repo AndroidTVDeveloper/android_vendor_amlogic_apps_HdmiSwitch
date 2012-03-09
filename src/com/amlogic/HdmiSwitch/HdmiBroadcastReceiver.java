@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.view.WindowManagerPolicy;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 
 import java.io.File;
 import java.io.FileReader;
@@ -87,6 +89,11 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                         Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
                         it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
                         context.sendStickyBroadcast(it);
+                        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {                        
+                            int dualEnabled = Settings.System.getInt(context.getContentResolver(),
+                                                    Settings.System.HDMI_DUAL_DISP, 1);
+                            HdmiSwitch.setDualDisplayStatic(plugged, (dualEnabled == 1));
+                        }                        
                      }
                  }
                  NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
