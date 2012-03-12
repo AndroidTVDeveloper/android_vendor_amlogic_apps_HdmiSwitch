@@ -629,6 +629,7 @@ public class HdmiSwitch extends Activity {
     private static final String VIDEO2_FRAME_RATE_PATH = "/sys/module/amvideo2/parameters/clone_frame_rate";
     private static final String VIDEO2_FRAME_WIDTH_PATH = "/sys/module/amvideo2/parameters/clone_frame_scale_width";
     private static final String VIDEO2_SCREEN_MODE_PATH = "/sys/class/video2/screen_mode";
+    private static final String VIDEO2_ZOOM_PATH = "/sys/class/video2/zoom";
     
     private static int writeSysfs(String path, String val) {
         if (!new File(path).exists()) {
@@ -671,6 +672,7 @@ public class HdmiSwitch extends Activity {
             } else {
                 writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
             }
+            writeSysfs(VIDEO2_ZOOM_PATH, "105");
             
             if (getDualDisplayState() == 1) {
                 writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
