@@ -74,6 +74,7 @@ public class HdmiSwitch extends Activity {
 	public static final String FB1_BLANK_PATH = "/sys/class/graphics/fb1/blank";
 	
 	public static final String DISABLE_VIDEO_PATH = "/sys/class/video/disable_video";
+	public static final String REQUEST2XSCALE_PATH = "/sys/class/graphics/fb0/request2XScale";
 	
 	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
 	//public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
@@ -541,7 +542,7 @@ public class HdmiSwitch extends Activity {
     			setFb0Blank("0");
     			disableVideo(false);
     			setBrightness(briStr);
-
+    			writeSysfs(REQUEST2XSCALE_PATH, "0");
     		}
     		else if (getCurMode().equals("480p"))
     			freeScaleSetModeJni(1);  
