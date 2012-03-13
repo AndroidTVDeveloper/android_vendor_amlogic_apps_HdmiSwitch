@@ -686,6 +686,7 @@ public class HdmiSwitch extends Activity {
             writeSysfs(VIDEO2_CTRL_PATH, "0");
             writeSysfs(VFM_CTRL_PATH, "rm default_ext");
             writeSysfs(VFM_CTRL_PATH, "add default_ext vdin vm amvideo");
+            writeSysfs(MODE_PATH_VOUT2, "null");
         }    	
     }
     
@@ -727,6 +728,7 @@ public class HdmiSwitch extends Activity {
             writeSysfs(VIDEO2_CTRL_PATH, "0");
             writeSysfs(VFM_CTRL_PATH, "rm default_ext");
             writeSysfs(VFM_CTRL_PATH, "add default_ext vdin vm amvideo");
+            writeSysfs(MODE_PATH_VOUT2, "null");
         }    	
     }    
     
