@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>    
-    <string name="app_name">Hdmi设置</string>
-    <string name="title_text_str">Hdmi 输出选择</string>
-    <string name="hdmi_state_str1">Hdmi 已连接</string>
-    <string name="hdmi_state_str2">Hdmi 未连接</string>
+    <string name="app_name">HDMI设置</string>
+    <string name="title_text_str">HDMI 输出选择</string>
+    <string name="hdmi_state_str1">HDMI 已连接</string>
+    <string name="hdmi_state_str2">HDMI 未连接</string>
     <string name="hdmi_info_str1"></string>
     <string name="hdmi_info_str2"></string>    
-    <string name="driver_api_err">Hdmi 检测错误:请升级程序</string>
+    <string name="driver_api_err">HDMI 检测错误:请升级程序</string>
     
     <string name="mode_str_panel">LCD屏幕</string>
     <string name="mode_str_480i">HDMI 480i</string>
