@@ -988,7 +988,10 @@ public class HdmiSwitch extends Activity {
             	
             case 2:		// setMode finish, show confirm dialog
                 if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
-                    setDualDisplay(!getCurMode().equals("panel"));
+                    boolean hdmiPlugged = !getCurMode().equals("panel");
+                    if (hdmiPlugged) setFb0Blank("1");
+                    setDualDisplay(hdmiPlugged);
+                    if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
                 }                           
 				notifyModeChanged();
 				updateListDisplay();					
@@ -1003,11 +1006,20 @@ public class HdmiSwitch extends Activity {
             	
             case 3:		// setMode finish
                 if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
-                    setDualDisplay(!getCurMode().equals("panel"));
+                    boolean hdmiPlugged = !getCurMode().equals("panel");
+                    if (hdmiPlugged) setFb0Blank("1");
+                    setDualDisplay(hdmiPlugged);
+                    if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
                 }                       
 				notifyModeChanged();
 				updateListDisplay();
           	
+            	break;
+            	
+            case 4:     // delayed panel on
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                    setFb0Blank("0");
+                }
             	break;            	
             }
         }
