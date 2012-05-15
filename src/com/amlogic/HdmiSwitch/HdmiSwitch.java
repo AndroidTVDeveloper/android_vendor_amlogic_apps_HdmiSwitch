@@ -542,7 +542,7 @@ public class HdmiSwitch extends Activity {
     			setFb0Blank("0");
     			disableVideo(false);
     			setBrightness(briStr);
-    			writeSysfs(REQUEST2XSCALE_PATH, "0");
+    			writeSysfs(REQUEST2XSCALE_PATH, "2");
     		}
     		else if (getCurMode().equals("480p"))
     			freeScaleSetModeJni(1);  
