@@ -95,6 +95,7 @@ public class HdmiSwitch extends Activity {
 	private static String old_mode = "panel";
 
 	private ListView lv;
+       private static int mHdmiVppRotation = 0; 
 	
     /** Called when the activity is first created. */
     @Override
@@ -118,6 +119,7 @@ public class HdmiSwitch extends Activity {
             lp.width = (int) (display.getWidth() * 0.5);            	
         }
         getWindow().setAttributes(lp);        
+        mHdmiVppRotation = SystemProperties.getInt("ro.vpp.hdmi.rotation", 0);
         
 //        /* close button listener */
 //        Button btn_close = (Button) findViewById(R.id.title_btn_right);  
@@ -663,7 +665,11 @@ public class HdmiSwitch extends Activity {
         if (hdmiPlugged) {
             writeSysfs(VIDEO2_CTRL_PATH, "0");
             writeSysfs(VFM_CTRL_PATH, "rm default_ext");
+            if(mHdmiVppRotation > 0){
+                writeSysfs(VFM_CTRL_PATH, "add default_ext vdin freescale amvideo2");
+            }else{
             writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
+            }
             writeSysfs(VIDEO2_CTRL_PATH, "1");
 
             if (getCurMode().equals("720p")) {
