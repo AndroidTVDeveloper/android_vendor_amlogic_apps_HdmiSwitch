@@ -703,6 +703,7 @@ public class HdmiSwitch extends Activity {
     
     public static void setDualDisplayStatic(boolean hdmiPlugged, boolean dualEnabled) {
         String isCameraBusy = SystemProperties.get("camera.busy", "0");
+        int hdmiVppRotation = SystemProperties.getInt("ro.vpp.hdmi.rotation", 0);
  
         if (!isCameraBusy.equals("0")) {
             Log.w(TAG, "setDualDisplay, camera is busy");
@@ -711,8 +712,12 @@ public class HdmiSwitch extends Activity {
         
         if (hdmiPlugged) {
             writeSysfs(VIDEO2_CTRL_PATH, "0");
-            writeSysfs(VFM_CTRL_PATH, "rm default_ext");
-            writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
+            writeSysfs(VFM_CTRL_PATH, "rm default_ext");            
+            if(hdmiVppRotation > 0){
+                writeSysfs(VFM_CTRL_PATH, "add default_ext vdin freescale amvideo2");
+            }else{
+                writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
+            }
             writeSysfs(VIDEO2_CTRL_PATH, "1");
 
             if (getCurMode().equals("720p")) {
