@@ -25,6 +25,7 @@
 			<action android:name="android.intent.action.HDMI_HW_PLUGGED"/>
 		 </intent-filter>
 	 </receiver>
+	 <service android:name=".HdmiDelayedService" />  
     </application>
     <uses-sdk android:minSdkVersion="14"/>
 

@@ -85,15 +85,20 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
             }else{
                  if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
                      if (!HdmiSwitch.getCurMode().equals("panel")) {
-                        HdmiSwitch.setMode("panel");
                         Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
                         it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
-                        context.sendStickyBroadcast(it);
-                        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {                        
-                            int dualEnabled = Settings.System.getInt(context.getContentResolver(),
-                                                    Settings.System.HDMI_DUAL_DISP, 1);
-                            HdmiSwitch.setDualDisplayStatic(plugged, (dualEnabled == 1));
-                        }                        
+                        context.sendStickyBroadcast(it);                        
+//                        HdmiSwitch.setMode("panel");
+//                        //Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+//                        //it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
+//                        //context.sendStickyBroadcast(it);
+//                        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {                        
+//                            int dualEnabled = Settings.System.getInt(context.getContentResolver(),
+//                                                    Settings.System.HDMI_DUAL_DISP, 1);
+//                            HdmiSwitch.setDualDisplayStatic(plugged, (dualEnabled == 1));
+//                        }       
+            			context.startService(new Intent(context, 
+            				HdmiDelayedService.class));                 
                      }
                  }
                  NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
