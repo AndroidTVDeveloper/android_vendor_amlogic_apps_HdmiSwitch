@@ -2,6 +2,7 @@ package com.amlogic.HdmiSwitch;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.WindowManagerPolicy;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileReader;
@@ -82,12 +84,63 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 notification.setLatestEventInfo(context, context.getText(R.string.app_name), text, contentIntent);
 
                 nM.notify(HDMI_NOTIFICATIONS, notification);
+                onHdmiPlugged(context);
+                
             }else{
-                 if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
-                     if (!HdmiSwitch.getCurMode().equals("panel")) {
-                        Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
-                        it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
-                        context.sendStickyBroadcast(it);                        
+                onHdmiUnplugged(context);
+                 
+                NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
+                nM.cancel(HDMI_NOTIFICATIONS); 
+            }
+        }
+    }
+    
+    
+    private void onHdmiPlugged(Context context) {
+        if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
+            if (HdmiSwitch.getCurMode().equals("panel")) {
+                int autoSwitchEnabled = Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.HDMI_AUTO_SWITCH, 0);                
+                if (autoSwitchEnabled != 1)
+                    return;
+                
+                // camera in-use
+                String isCameraBusy = SystemProperties.get("camera.busy", "0");
+                if (!isCameraBusy.equals("0")) {
+                    Log.w(TAG, "onHdmiPlugged, camera is busy");
+                    Toast.makeText(context,
+                        context.getText(R.string.Toast_msg_camera_busy),
+                        Toast.LENGTH_LONG).show();                     
+                    return;
+                }
+                // keyguard on
+                KeyguardManager mKeyguardManager = (KeyguardManager) context.getSystemService(context.KEYGUARD_SERVICE); 
+        		if (mKeyguardManager != null && mKeyguardManager.inKeyguardRestrictedInputMode()) {
+        		    Log.w(TAG, "onHdmiPlugged, keyguard on");
+        			return;
+        		}
+        		
+                HdmiSwitch.setFb0Blank("1");
+                HdmiSwitch.setMode("720p");
+                Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+                it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, true);
+                context.sendStickyBroadcast(it);
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {                        
+                    int dualEnabled = Settings.System.getInt(context.getContentResolver(),
+                                            Settings.System.HDMI_DUAL_DISP, 1);
+                    HdmiSwitch.setDualDisplayStatic(true, (dualEnabled == 1));
+                } 
+                HdmiSwitch.setFb0Blank("0");            
+            }
+        }
+    }    
+    
+    private void onHdmiUnplugged(Context context) {
+         if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
+             if (!HdmiSwitch.getCurMode().equals("panel")) {
+                Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+                it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
+                context.sendStickyBroadcast(it);                        
 //                        HdmiSwitch.setMode("panel");
 //                        //Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
 //                        //it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
@@ -97,14 +150,10 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
 //                                                    Settings.System.HDMI_DUAL_DISP, 1);
 //                            HdmiSwitch.setDualDisplayStatic(plugged, (dualEnabled == 1));
 //                        }       
-            			context.startService(new Intent(context, 
-            				HdmiDelayedService.class));                 
-                     }
-                 }
-                 NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-                 nM.cancel(HDMI_NOTIFICATIONS); 
-            }
-        }
+    			context.startService(new Intent(context, 
+    				HdmiDelayedService.class));                 
+             }
+         }    
     }
 
 }

@@ -721,12 +721,13 @@ public class HdmiSwitch extends Activity {
             writeSysfs(VIDEO2_CTRL_PATH, "1");
 
             if (getCurMode().equals("720p")) {
-                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "500");
+                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "640");
             } else if (getCurMode().equals("1080p")) {
                 writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "800");
             } else {
                 writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
             }
+            writeSysfs(VIDEO2_ZOOM_PATH, "105");
             
             if (dualEnabled) {
                 writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
@@ -769,7 +770,7 @@ public class HdmiSwitch extends Activity {
     }    
     
     /** set osd blank*/    
-    private static int setFb0Blank(String blankStr) {
+    public static int setFb0Blank(String blankStr) {
     	//Log.i(TAG, "setFb0Blank: " + blankStr);
         File file = new File(FB0_BLANK_PATH);
         if (!file.exists()) {        	
