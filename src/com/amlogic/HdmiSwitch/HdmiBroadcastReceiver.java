@@ -14,6 +14,12 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.widget.Toast;
 
+import android.view.KeyEvent;
+import android.view.IWindowManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.SystemClock;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -138,9 +144,17 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     private void onHdmiUnplugged(Context context) {
          if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
              if (!HdmiSwitch.getCurMode().equals("panel")) {
-                Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
-                it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
-                context.sendStickyBroadcast(it);                        
+                
+                /// 1. send broadcast to stop player
+//                Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+//                it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
+//                context.sendStickyBroadcast(it);   
+                
+                /// 2. send BACK key to stop player
+                sendKeyEvent(KeyEvent.KEYCODE_BACK);
+                
+                /// 3. kill player
+           
 //                        HdmiSwitch.setMode("panel");
 //                        //Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
 //                        //it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
@@ -154,6 +168,29 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     				HdmiDelayedService.class));                 
              }
          }    
+    }
+
+    /**
+     * Send a single key event.
+     *
+     * @param event is a string representing the keycode of the key event you
+     * want to execute.
+     */
+    private void sendKeyEvent(int keyCode) {
+        int eventCode = keyCode;
+        long now = SystemClock.uptimeMillis();
+        try {
+            KeyEvent down = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, eventCode, 0);
+            KeyEvent up = new KeyEvent(now, now, KeyEvent.ACTION_UP, eventCode, 0);
+            (IWindowManager.Stub
+                .asInterface(ServiceManager.getService("window")))
+                .injectInputEventNoWait(down);
+            (IWindowManager.Stub
+                .asInterface(ServiceManager.getService("window")))
+                .injectInputEventNoWait(up);
+        } catch (RemoteException e) {
+            Log.i(TAG, "DeadOjbectException");
+        }
     }
 
 }
