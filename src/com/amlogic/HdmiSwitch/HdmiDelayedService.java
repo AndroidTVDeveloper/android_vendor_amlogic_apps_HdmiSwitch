@@ -16,7 +16,7 @@ import android.util.Log;
 public class HdmiDelayedService extends Service {
     private static final String TAG = "HdmiDelayedService";
 
-    private static int DELAY = 1*1000;	
+    private static int DELAY = 3*1000;	
 
     private Handler mProgressHandler;
     private Context mContext;
