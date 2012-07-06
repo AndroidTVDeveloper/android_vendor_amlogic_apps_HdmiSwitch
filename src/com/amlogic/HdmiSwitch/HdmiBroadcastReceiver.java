@@ -130,6 +130,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 
                 /// send BACK key to stop other player
                 sendKeyEvent(KeyEvent.KEYCODE_BACK);                
+                sendKeyEvent(KeyEvent.KEYCODE_HOME);
                 
                 HdmiSwitch.setMode("720p");
                 Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
@@ -156,6 +157,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 
                 /// 2. send BACK key to stop player
                 sendKeyEvent(KeyEvent.KEYCODE_BACK);
+                sendKeyEvent(KeyEvent.KEYCODE_HOME);
                 
                 /// 3. kill player
            
