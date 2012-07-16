@@ -554,35 +554,6 @@ public class HdmiSwitch extends Activity {
     			freeScaleSetModeJni(3);  
     		else if (getCurMode().equals("1080p"))
     			freeScaleSetModeJni(4);  
- 		
-    		
-//    		//do spk_mute/unmute
-//    		if (getCurMode().equals("panel"))
-//    			setAudio(SPK_UNMUTE);
-//    		else
-//    			setAudio(SPK_MUTE);    		
-    		
-//    		//do 2x scale only for 1080p
-//    		if (modeStr.equals("1080p")) {
-//    			if (setScale("0x10001") == 0)
-//    				scaleFrameBufferJni(1);
-//    		}
-//    		else {
-//    			setScale("0x00000");
-//    			scaleFrameBufferJni(0);    			
-//    		}
-//    		
-//    		setAxis(MODE_AXIS_TABLE.get(modeStr));
-//    		
-//    		//set WakeLock
-//    		if (getCurMode().equals("panel")) {
-//    			if (mWakeLock.isHeld())
-//    				mWakeLock.release();    				
-//    		}
-//    		else {
-//    			if (!mWakeLock.isHeld())
-//    				mWakeLock.acquire();    				
-//    		}
     		
     		return 0;
     		
@@ -697,8 +668,9 @@ public class HdmiSwitch extends Activity {
     }
     
     private int getDualDisplayState() {
-        return Settings.System.getInt(getContentResolver(),
-                    Settings.System.HDMI_DUAL_DISP, 1);
+//        return Settings.System.getInt(getContentResolver(),
+//                    Settings.System.HDMI_DUAL_DISP, 1);
+        return 1;
     }    
     
     public static void setDualDisplayStatic(boolean hdmiPlugged, boolean dualEnabled) {
@@ -876,46 +848,6 @@ public class HdmiSwitch extends Activity {
         	}    	
     }    
     
-//    /** set scale*/
-//    public static int setScale(String scaleStr) {
-//        File file = new File(SCALE_FB0_PATH);
-//        if (!file.exists()) {        	
-//        	return 1;
-//        }   
-//        file = new File(SCALE_FB1_PATH);
-//        if (!file.exists()) {        	
-//        	return 1;
-//        }
-//    	
-//    	try {
-//        	BufferedWriter writer = new BufferedWriter(new FileWriter(SCALE_FB0_PATH), 32);
-//        		try {
-//        			writer.write(scaleStr + "\r\n");
-//        		} finally {
-//        			writer.close();
-//        		}   
-//
-//            	try {
-//                	writer = new BufferedWriter(new FileWriter(SCALE_FB1_PATH), 32);
-//                		try {
-//                			writer.write(scaleStr + "\r\n");
-//                		} finally {
-//                			writer.close();
-//                		}    		
-//                		return 0;
-//                		
-//                	} catch (IOException e) { 
-//                		Log.e(TAG, "IO Exception when write: " + SCALE_FB1_PATH, e);
-//                		return 1;
-//                	} 
-//        		
-//        	} catch (IOException e) { 
-//        		Log.e(TAG, "IO Exception when write: " + SCALE_FB0_PATH, e);
-//        		return 1;
-//        	}         	
-//         	
-//    }
-    
     /** process handler */
     private class HdmiSwitchProgressHandler extends Handler {
         @Override
@@ -1049,62 +981,7 @@ public class HdmiSwitch extends Activity {
 		//MODE_AXIS_TABLE.put("1080p", "560 300 800 480 560 300 18 18");
 		MODE_AXIS_TABLE.put("1080p", "160 60 1600 960 160 60 36 36");	//2x scale	
 	}
-	
-	/** fastSwitch func for amlplayer*/
-	public static int fastSwitch() {		
-        /* check driver interface */        
-        File file = new File(HdmiSwitch.DISP_CAP_PATH);
-        if (!file.exists()) {        	
-        	return 0;
-        }
-        file = new File(HdmiSwitch.MODE_PATH);
-        if (!file.exists()) {        	
-        	return 0;
-        }
-        file = new File(HdmiSwitch.AXIS_PATH);
-        if (!file.exists()) {        	
-        	return 0;
-        }	
-        
-        /* panel <-> TV*/
-        if (getCurMode().equals("panel")) {  
-        	String mode = getBestMode();
-        	if (mode != null)
-        		setMode(mode);
-        	return 1;
-        } else {
-        	setMode("panel");
-        	return 1;
-        }   
-	}
-	/** get the best mode */
-    private static String getBestMode() {
-    	List<String> list = new ArrayList<String>();    	
-    	String modeStr;
-   	
-    	try {
-    		BufferedReader reader = new BufferedReader(new FileReader(DISP_CAP_PATH), 256);
-    		try {
-    			while ((modeStr = reader.readLine()) != null) {
-    				modeStr = modeStr.split("\\*")[0]; //720p* to 720p
-    				
-    				if (MODE_STR_TABLE.containsKey(modeStr))
-    					list.add(modeStr);	
-    			}
-    		} finally {
-    			reader.close();
-    		}   
-    		
-    	} catch (IOException e) { 
-    		Log.e(TAG, "IO Exception when read: " + DISP_CAP_PATH, e);    		
-    	}    	
-    	
-    	if (list.size() > 0) {    		
-    		return list.get(list.size() - 1);
-    	} else
-    		return null;
-    }
-    
+   
     //option menu    
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -1118,39 +995,6 @@ public class HdmiSwitch extends Activity {
         menu.add(0, 0, 0, getText(R.string.app_name) + " v" + ver_str);
         return true;
     }    
-    
-    //fix free_scale for video 
-    public static int doBeforePlayVideo() {
-		if (!isHdmiConnected())
-			return 0;
-    	
-    	if (!getCurMode().equals("panel")) {
-    		if (getCurMode().equals("480p"))
-    			DisableFreeScaleJni(1);  
-    		else if (getCurMode().equals("720p"))
-    			DisableFreeScaleJni(2);  
-    		else if (getCurMode().equals("1080i"))
-    			DisableFreeScaleJni(3);  
-    		else if (getCurMode().equals("1080p"))
-    			DisableFreeScaleJni(4);  
-    	}    	
-		return 0;    	
-    }
-    public static int doAfterPlayVideo() {
-		if (!isHdmiConnected())
-			return 0;
-    	
-    	if (!getCurMode().equals("panel")) {
-    		if (getCurMode().equals("480p"))
-    			EnableFreeScaleJni(1);  
-    		else if (getCurMode().equals("720p"))
-    			EnableFreeScaleJni(2);  
-    		else if (getCurMode().equals("1080i"))
-    			EnableFreeScaleJni(3);  
-    		else if (getCurMode().equals("1080p"))
-    			EnableFreeScaleJni(4);  
-    	}    	
-		return 0;   	
-    }    
+ 
     
 }

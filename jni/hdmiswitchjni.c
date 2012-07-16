@@ -8,6 +8,14 @@
 
 #include "hdmiswitchjni.h"
 
+#ifndef LOGD
+    #define LOGV ALOGV
+    #define LOGD ALOGD
+    #define LOGI ALOGI
+    #define LOGW ALOGW
+    #define LOGE ALOGE
+#endif
+
 #define  FBIOPUT_OSD_FREE_SCALE_ENABLE	0x4504
 #define  FBIOPUT_OSD_FREE_SCALE_WIDTH	0x4505
 #define  FBIOPUT_OSD_FREE_SCALE_HEIGHT	0x4506
@@ -22,7 +30,7 @@ int freeScale(int mode) {
 	int fd_fb = -1;
 	int fd_video = -1;
 	int fd_ppmgr = -1;
-        int fd_ppmgr_rect = -1;
+    int fd_ppmgr_rect = -1;
 	int osd_width = 0, osd_height = 0;	
 	int ret = -1;
 	int x = 0, y = 0, w = 0, h = 0;
@@ -98,11 +106,11 @@ int freeScale(int mode) {
 			//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
 			write(fd_daxis, daxis_str, strlen(daxis_str));				
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);		
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);		
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);	
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);	
 			if((fd_ppmgr >= 0)&&(find_flag)){
 				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 			}
@@ -119,13 +127,13 @@ int freeScale(int mode) {
 				write(fd_vaxis, "20 10 700 470", strlen("20 10 700 470"));
 			write(fd_daxis, daxis_str, strlen(daxis_str));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height); 
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			if((fd_ppmgr >= 0)&&(find_flag)){
 				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 			}
@@ -142,14 +150,14 @@ int freeScale(int mode) {
 				write(fd_vaxis, "40 15 1240 705", strlen("40 15 1240 705"));
 			write(fd_daxis, daxis_str, strlen(daxis_str));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			if((fd_ppmgr >= 0)&&(find_flag)){
 				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 			}
@@ -167,13 +175,13 @@ int freeScale(int mode) {
 				write(fd_vaxis, "40 20 1880 1060", strlen("40 20 1880 1060"));
 			write(fd_daxis, daxis_str, strlen(daxis_str));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
+			//ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
 			if((fd_ppmgr >= 0)&&(find_flag)){
 				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 			}
@@ -202,8 +210,9 @@ JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleSetModeJn
 																									jobject thiz, jint mode )
 {	
 		return freeScale(mode);
-}						
-
+}
+						
+/***
 int DisableFreeScale(int mode) {
 	int fd0 = -1, fd1 = -1;
 	int fd_daxis = -1, fd_vaxis = -1;
@@ -532,3 +541,4 @@ JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_EnableFreeScaleJni
 {	
 		return EnableFreeScale(mode);
 }
+***/
