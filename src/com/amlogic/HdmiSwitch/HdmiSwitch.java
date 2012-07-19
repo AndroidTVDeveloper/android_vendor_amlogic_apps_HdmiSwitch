@@ -744,6 +744,10 @@ public class HdmiSwitch extends Activity {
         }    	
     }    
     
+    public static void setVout2OffStatic() {
+        writeSysfs(MODE_PATH_VOUT2, "null");
+    }    
+    
     /** video layer control */
     private static int disableVideo(boolean disable) {
     	//Log.i(TAG, "disableVideo: " + disable);

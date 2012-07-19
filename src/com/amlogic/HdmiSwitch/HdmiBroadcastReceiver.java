@@ -149,6 +149,8 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
          if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
              if (!HdmiSwitch.getCurMode().equals("panel")) {
                 
+                HdmiSwitch.setVout2OffStatic();
+                
                 /// 1. send broadcast to stop player
 //                Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
 //                it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
