@@ -135,7 +135,8 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
                 it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, true);
                 context.sendStickyBroadcast(it);
-                if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {                        
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)
+                    || SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {                        
                     int dualEnabled = Settings.System.getInt(context.getContentResolver(),
                                             Settings.System.HDMI_DUAL_DISP, 1);
                     HdmiSwitch.setDualDisplayStatic(true, (dualEnabled == 1));

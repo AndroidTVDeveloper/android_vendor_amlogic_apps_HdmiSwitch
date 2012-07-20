@@ -186,7 +186,8 @@ public class HdmiSwitch extends Activity {
 //					else
 //						finish();
 
-                    if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                    if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)
+                        || SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
                         String isCameraBusy = SystemProperties.get("camera.busy", "0");
                         if (!isCameraBusy.equals("0")) {
                             Log.w(TAG, "setDualDisplay, camera is busy");
@@ -634,6 +635,11 @@ public class HdmiSwitch extends Activity {
     private static final String VIDEO2_SCREEN_MODE_PATH = "/sys/class/video2/screen_mode";
     private static final String VIDEO2_ZOOM_PATH = "/sys/class/video2/zoom";
     
+    private static final String FB2_BLANK_PATH = "/sys/class/graphics/fb2/blank";
+    private static final String FB2_CLONE_PATH = "/sys/class/graphics/fb2/clone";
+    //private static final String REG_PATH = "/sys/class/amlogic/debug";
+    private static final String REG_PATH = "/sys/class/amhdmitx/amhdmitx0/debug";    
+    
     private static int writeSysfs(String path, String val) {
         if (!new File(path).exists()) {
             Log.e(TAG, "File not found: " + path);
@@ -662,38 +668,52 @@ public class HdmiSwitch extends Activity {
             return;
         }    
         
-        if (hdmiPlugged) {
-            writeSysfs(VIDEO2_CTRL_PATH, "0");
-            writeSysfs(VFM_CTRL_PATH, "rm default_ext");
-            if(mHdmiVppRotation > 0){
-                writeSysfs(VFM_CTRL_PATH, "add default_ext vdin freescale amvideo2");
-            }else{
-            writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
-            }
-            writeSysfs(VIDEO2_CTRL_PATH, "1");
-
-            if (getCurMode().equals("720p")) {
-                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "640");
-            } else if (getCurMode().equals("1080p")) {
-                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "800");
+        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {        
+            if (hdmiPlugged) {
+                writeSysfs(VIDEO2_CTRL_PATH, "0");
+                writeSysfs(VFM_CTRL_PATH, "rm default_ext");
+                if(mHdmiVppRotation > 0){
+                    writeSysfs(VFM_CTRL_PATH, "add default_ext vdin freescale amvideo2");
+                }else{
+                writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
+                }
+                writeSysfs(VIDEO2_CTRL_PATH, "1");
+    
+                if (getCurMode().equals("720p")) {
+                    writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "640");
+                } else if (getCurMode().equals("1080p")) {
+                    writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "800");
+                } else {
+                    writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
+                }
+                writeSysfs(VIDEO2_ZOOM_PATH, "105");
+                
+                if (getDualDisplayState() == 1) {
+                    writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
+                    writeSysfs(MODE_PATH_VOUT2, "null");
+                    writeSysfs(MODE_PATH_VOUT2, "panel");
+                }
             } else {
-                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
-            }
-            writeSysfs(VIDEO2_ZOOM_PATH, "105");
-            
-            if (getDualDisplayState() == 1) {
-                writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
+                writeSysfs(VIDEO2_CTRL_PATH, "0");
+                writeSysfs(VFM_CTRL_PATH, "rm default_ext");
+                writeSysfs(VFM_CTRL_PATH, "add default_ext vdin vm amvideo");
+                writeSysfs(MODE_PATH_VOUT2, "null");
+            } 
+        } else if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
+            if (hdmiPlugged && (getDualDisplayState() == 1)) {
+                writeSysfs(FB2_BLANK_PATH, "1");
+                writeSysfs(FB2_CLONE_PATH, "1");
                 writeSysfs(MODE_PATH_VOUT2, "null");
                 writeSysfs(MODE_PATH_VOUT2, "panel");
-            }
-                         
-            
-        } else {
-            writeSysfs(VIDEO2_CTRL_PATH, "0");
-            writeSysfs(VFM_CTRL_PATH, "rm default_ext");
-            writeSysfs(VFM_CTRL_PATH, "add default_ext vdin vm amvideo");
-            writeSysfs(MODE_PATH_VOUT2, "null");
-        }    	
+                writeSysfs(REG_PATH, "w 0x2 c 0x271a");
+                writeSysfs(FB2_BLANK_PATH, "0");
+            } else {
+                writeSysfs(FB2_BLANK_PATH, "1");
+                writeSysfs(FB2_CLONE_PATH, "0");
+                writeSysfs(MODE_PATH_VOUT2, "null");
+                writeSysfs(REG_PATH, "w 0x0 c 0x271a");            
+            }        
+        } 	
     }
     
     private int getDualDisplayState() {
@@ -710,38 +730,54 @@ public class HdmiSwitch extends Activity {
             return;
         }    
         
-        if (hdmiPlugged) {
-            writeSysfs(VIDEO2_CTRL_PATH, "0");
-            writeSysfs(VFM_CTRL_PATH, "rm default_ext");            
-            if(hdmiVppRotation > 0){
-                writeSysfs(VFM_CTRL_PATH, "add default_ext vdin freescale amvideo2");
-            }else{
-                writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
-            }
-            writeSysfs(VIDEO2_CTRL_PATH, "1");
-
-            if (getCurMode().equals("720p")) {
-                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "640");
-            } else if (getCurMode().equals("1080p")) {
-                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "800");
+        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) { 
+            if (hdmiPlugged) {
+                writeSysfs(VIDEO2_CTRL_PATH, "0");
+                writeSysfs(VFM_CTRL_PATH, "rm default_ext");            
+                if(hdmiVppRotation > 0){
+                    writeSysfs(VFM_CTRL_PATH, "add default_ext vdin freescale amvideo2");
+                }else{
+                    writeSysfs(VFM_CTRL_PATH, "add default_ext vdin amvideo2");
+                }
+                writeSysfs(VIDEO2_CTRL_PATH, "1");
+    
+                if (getCurMode().equals("720p")) {
+                    writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "640");
+                } else if (getCurMode().equals("1080p")) {
+                    writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "800");
+                } else {
+                    writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
+                }
+                writeSysfs(VIDEO2_ZOOM_PATH, "105");
+                
+                if (dualEnabled) {
+                    writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
+                    writeSysfs(MODE_PATH_VOUT2, "null");
+                    writeSysfs(MODE_PATH_VOUT2, "panel");
+                }
+                             
+                
             } else {
-                writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
-            }
-            writeSysfs(VIDEO2_ZOOM_PATH, "105");
-            
-            if (dualEnabled) {
-                writeSysfs(VIDEO2_SCREEN_MODE_PATH, "1");
+                writeSysfs(VIDEO2_CTRL_PATH, "0");
+                writeSysfs(VFM_CTRL_PATH, "rm default_ext");
+                writeSysfs(VFM_CTRL_PATH, "add default_ext vdin vm amvideo");
+                writeSysfs(MODE_PATH_VOUT2, "null");
+            } 
+        } else if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
+            if (hdmiPlugged && dualEnabled) {
+                writeSysfs(FB2_BLANK_PATH, "1");
+                writeSysfs(FB2_CLONE_PATH, "1");
                 writeSysfs(MODE_PATH_VOUT2, "null");
                 writeSysfs(MODE_PATH_VOUT2, "panel");
-            }
-                         
-            
-        } else {
-            writeSysfs(VIDEO2_CTRL_PATH, "0");
-            writeSysfs(VFM_CTRL_PATH, "rm default_ext");
-            writeSysfs(VFM_CTRL_PATH, "add default_ext vdin vm amvideo");
-            writeSysfs(MODE_PATH_VOUT2, "null");
-        }    	
+                writeSysfs(REG_PATH, "w 0x2 c 0x271a");
+                writeSysfs(FB2_BLANK_PATH, "0");
+            } else {
+                writeSysfs(FB2_BLANK_PATH, "1");
+                writeSysfs(FB2_CLONE_PATH, "0");
+                writeSysfs(MODE_PATH_VOUT2, "null");
+                writeSysfs(REG_PATH, "w 0x0 c 0x271a");            
+            }        
+        } 	   	
     }    
     
     public static void setVout2OffStatic() {
@@ -997,7 +1033,13 @@ public class HdmiSwitch extends Activity {
                     if (hdmiPlugged) setFb0Blank("1");
                     setDualDisplay(hdmiPlugged);
                     if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
-                }                           
+                }
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
+                    boolean hdmiPlugged = !getCurMode().equals("panel");
+                    if (hdmiPlugged) writeSysfs(FB2_BLANK_PATH, "1");
+                    setDualDisplay(hdmiPlugged);
+                    if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
+                }                                           
 				notifyModeChanged();
 				updateListDisplay();					
 				if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
@@ -1015,7 +1057,13 @@ public class HdmiSwitch extends Activity {
                     if (hdmiPlugged) setFb0Blank("1");
                     setDualDisplay(hdmiPlugged);
                     if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
-                }                       
+                }  
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
+                    boolean hdmiPlugged = !getCurMode().equals("panel");
+                    if (hdmiPlugged) writeSysfs(FB2_BLANK_PATH, "1");;
+                    setDualDisplay(hdmiPlugged);
+                    if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
+                }                                      
 				notifyModeChanged();
 				updateListDisplay();
           	
@@ -1025,6 +1073,9 @@ public class HdmiSwitch extends Activity {
                 if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
                     setFb0Blank("0");
                 }
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
+                    writeSysfs(FB2_BLANK_PATH, "0");;
+                }                
             	break;            	
             }
         }
