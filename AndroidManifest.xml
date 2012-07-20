@@ -22,9 +22,10 @@
 	 <receiver android:name=".HdmiBroadcastReceiver">
 		 <intent-filter>
 			<action android:name="android.intent.action.BOOT_COMPLETED"/>
-			<action android:name="android.intent.action.HDMI_PLUGGED"/>
+			<action android:name="android.intent.action.HDMI_HW_PLUGGED"/>
 		 </intent-filter>
 	 </receiver>
+	 <service android:name=".HdmiDelayedService" />  
     </application>
     <uses-sdk android:minSdkVersion="14"/>
 
