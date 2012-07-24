@@ -781,7 +781,12 @@ public class HdmiSwitch extends Activity {
     }    
     
     public static void setVout2OffStatic() {
-        writeSysfs(MODE_PATH_VOUT2, "null");
+        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false))
+            setFb0Blank("1");
+        else if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false))
+            writeSysfs(FB2_BLANK_PATH, "1");
+            
+        //writeSysfs(MODE_PATH_VOUT2, "null");
     }    
     
     /** video layer control */
