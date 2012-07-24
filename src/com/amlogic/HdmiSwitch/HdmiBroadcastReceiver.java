@@ -106,7 +106,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
         if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
             if (HdmiSwitch.getCurMode().equals("panel")) {
                 int autoSwitchEnabled = Settings.System.getInt(context.getContentResolver(),
-                    Settings.System.HDMI_AUTO_SWITCH, 0);                
+                    Settings.System.HDMI_AUTO_SWITCH, 1);                
                 if (autoSwitchEnabled != 1)
                     return;
                 
