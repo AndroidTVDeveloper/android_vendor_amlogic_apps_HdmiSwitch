@@ -637,8 +637,7 @@ public class HdmiSwitch extends Activity {
     
     private static final String FB2_BLANK_PATH = "/sys/class/graphics/fb2/blank";
     private static final String FB2_CLONE_PATH = "/sys/class/graphics/fb2/clone";
-    //private static final String REG_PATH = "/sys/class/amlogic/debug";
-    private static final String REG_PATH = "/sys/class/amhdmitx/amhdmitx0/debug";    
+    private static final String REG_PATH = "/sys/class/display2/venc_mux";    
     
     private static int writeSysfs(String path, String val) {
         if (!new File(path).exists()) {
@@ -705,13 +704,13 @@ public class HdmiSwitch extends Activity {
                 writeSysfs(FB2_CLONE_PATH, "1");
                 writeSysfs(MODE_PATH_VOUT2, "null");
                 writeSysfs(MODE_PATH_VOUT2, "panel");
-                writeSysfs(REG_PATH, "w 0x2 c 0x271a");
+                writeSysfs(REG_PATH, "2");
                 writeSysfs(FB2_BLANK_PATH, "0");
             } else {
                 writeSysfs(FB2_BLANK_PATH, "1");
                 writeSysfs(FB2_CLONE_PATH, "0");
                 writeSysfs(MODE_PATH_VOUT2, "null");
-                writeSysfs(REG_PATH, "w 0x0 c 0x271a");            
+                writeSysfs(REG_PATH, "0");            
             }        
         } 	
     }
@@ -769,13 +768,13 @@ public class HdmiSwitch extends Activity {
                 writeSysfs(FB2_CLONE_PATH, "1");
                 writeSysfs(MODE_PATH_VOUT2, "null");
                 writeSysfs(MODE_PATH_VOUT2, "panel");
-                writeSysfs(REG_PATH, "w 0x2 c 0x271a");
+                writeSysfs(REG_PATH, "2");
                 writeSysfs(FB2_BLANK_PATH, "0");
             } else {
                 writeSysfs(FB2_BLANK_PATH, "1");
                 writeSysfs(FB2_CLONE_PATH, "0");
                 writeSysfs(MODE_PATH_VOUT2, "null");
-                writeSysfs(REG_PATH, "w 0x0 c 0x271a");            
+                writeSysfs(REG_PATH, "0");            
             }        
         } 	   	
     }    
