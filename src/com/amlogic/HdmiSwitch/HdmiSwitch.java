@@ -538,6 +538,10 @@ public class HdmiSwitch extends Activity {
     			writer.close();
     		} 
     		
+    		boolean playerRunning = SystemProperties.getBoolean("vplayer.playing", false);
+    		boolean playerExitWhenSwitch = SystemProperties.getBoolean("ro.vout.player.exit", true);
+    		boolean freescaleOff = !playerExitWhenSwitch && playerRunning;
+    		
     		//do free_scale    		
     		if (getCurMode().equals("panel")) { 
     			setFb0Blank("1");			
@@ -547,14 +551,27 @@ public class HdmiSwitch extends Activity {
     			setBrightness(briStr);
     			writeSysfs(REQUEST2XSCALE_PATH, "2");
     		}
-    		else if (getCurMode().equals("480p"))
-    			freeScaleSetModeJni(1);  
-    		else if (getCurMode().equals("720p"))
-    			freeScaleSetModeJni(2);  
-    		else if (getCurMode().equals("1080i"))
-    			freeScaleSetModeJni(3);  
-    		else if (getCurMode().equals("1080p"))
-    			freeScaleSetModeJni(4);  
+    		else if (getCurMode().equals("480p")) {
+    			if (freescaleOff)
+    			    DisableFreeScaleJni(1);
+    			else
+    			    freeScaleSetModeJni(1);  
+    		} else if (getCurMode().equals("720p")) {
+    			if (freescaleOff)
+    			    DisableFreeScaleJni(2);
+    			else    		    
+    			    freeScaleSetModeJni(2);  
+    		} else if (getCurMode().equals("1080i")) {
+    			if (freescaleOff)
+    			    DisableFreeScaleJni(3);
+    			else    		    
+    			    freeScaleSetModeJni(3);  
+    		} else if (getCurMode().equals("1080p")) {
+    			if (freescaleOff)
+    			    DisableFreeScaleJni(4);
+    			else    		    
+    			    freeScaleSetModeJni(4);  
+    		}
  		
     		
 //    		//do spk_mute/unmute
