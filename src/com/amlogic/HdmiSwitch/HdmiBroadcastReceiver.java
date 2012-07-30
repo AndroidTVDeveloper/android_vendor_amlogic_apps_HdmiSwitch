@@ -14,10 +14,6 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.widget.Toast;
 
-//import android.hardware.input.InputManager;
-//import android.view.InputDevice;
-//import android.view.KeyCharacterMap;
-
 import android.view.KeyEvent;
 import android.view.IWindowManager;
 import android.os.RemoteException;
@@ -79,7 +75,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
 	        		
         }    	
 
-        if (WindowManagerPolicy.ACTION_HDMI_PLUGGED.equals(intent.getAction())) {
+        if (WindowManagerPolicy.ACTION_HDMI_HW_PLUGGED.equals(intent.getAction())) {
             //Log.d(TAG, "onReceive: " + intent.getAction());
             boolean plugged = intent.getBooleanExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false); 
             if(plugged){
@@ -109,6 +105,10 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     private void onHdmiPlugged(Context context) {
         if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
             if (HdmiSwitch.getCurMode().equals("panel")) {
+                int autoSwitchEnabled = Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.HDMI_AUTO_SWITCH, 0);                
+                if (autoSwitchEnabled != 1)
+                    return;
                 
                 // camera in-use
                 String isCameraBusy = SystemProperties.get("camera.busy", "0");
@@ -126,12 +126,18 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
         			return;
         		}
         		
-                HdmiSwitch.setFb0Blank("1");                
+                HdmiSwitch.setFb0Blank("1");
+                
+                /// send BACK key to stop other player
+                sendKeyEvent(KeyEvent.KEYCODE_HOME);                
+                
                 HdmiSwitch.setMode("720p");
+                Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+                it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, true);
+                context.sendStickyBroadcast(it);
                 if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {                        
-//                    int dualEnabled = Settings.System.getInt(context.getContentResolver(),
-//                                            Settings.System.HDMI_DUAL_DISP, 1);
-                    int dualEnabled = 1;                        
+                    int dualEnabled = Settings.System.getInt(context.getContentResolver(),
+                                            Settings.System.HDMI_DUAL_DISP, 1);
                     HdmiSwitch.setDualDisplayStatic(true, (dualEnabled == 1));
                 } 
                 HdmiSwitch.setFb0Blank("0");            
@@ -142,33 +148,53 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     private void onHdmiUnplugged(Context context) {
          if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
              if (!HdmiSwitch.getCurMode().equals("panel")) {
+                
+                /// 1. send broadcast to stop player
+//                Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+//                it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
+//                context.sendStickyBroadcast(it);   
+                
+                /// 2. send BACK key to stop player
+                sendKeyEvent(KeyEvent.KEYCODE_HOME);
+                
+                /// 3. kill player
            
-                HdmiSwitch.setMode("panel");
-               
-                if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {                        
-//                    int dualEnabled = Settings.System.getInt(context.getContentResolver(),
-//                                            Settings.System.HDMI_DUAL_DISP, 1);
-                    int dualEnabled = 1;
-                    HdmiSwitch.setDualDisplayStatic(false, (dualEnabled == 1));
-                }       
-              
+//                        HdmiSwitch.setMode("panel");
+//                        //Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+//                        //it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
+//                        //context.sendStickyBroadcast(it);
+//                        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {                        
+//                            int dualEnabled = Settings.System.getInt(context.getContentResolver(),
+//                                                    Settings.System.HDMI_DUAL_DISP, 1);
+//                            HdmiSwitch.setDualDisplayStatic(plugged, (dualEnabled == 1));
+//                        }       
+    			context.startService(new Intent(context, 
+    				HdmiDelayedService.class));                 
              }
          }    
     }
 
-
-//    private void sendKeyEvent(int keyCode) {
-//        long now = SystemClock.uptimeMillis();
-//        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0, 0,
-//                KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
-//        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0, 0,
-//                KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
-//    }
-//    
-//    private void injectKeyEvent(KeyEvent event) {
-//        //Log.i(TAG, "InjectKeyEvent: " + event);
-//        InputManager.getInstance().injectInputEvent(event,
-//                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
-//    }    
+    /**
+     * Send a single key event.
+     *
+     * @param event is a string representing the keycode of the key event you
+     * want to execute.
+     */
+    private void sendKeyEvent(int keyCode) {
+        int eventCode = keyCode;
+        long now = SystemClock.uptimeMillis();
+        try {
+            KeyEvent down = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, eventCode, 0);
+            KeyEvent up = new KeyEvent(now, now, KeyEvent.ACTION_UP, eventCode, 0);
+            (IWindowManager.Stub
+                .asInterface(ServiceManager.getService("window")))
+                .injectInputEventNoWait(down);
+            (IWindowManager.Stub
+                .asInterface(ServiceManager.getService("window")))
+                .injectInputEventNoWait(up);
+        } catch (RemoteException e) {
+            Log.i(TAG, "DeadOjbectException");
+        }
+    }
 
 }
