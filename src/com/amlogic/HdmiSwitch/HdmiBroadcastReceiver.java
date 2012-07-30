@@ -23,6 +23,7 @@ import android.os.SystemClock;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import android.hardware.input.IInputManager;
 
 public class HdmiBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = "HdmiBroadcastReceiver";
@@ -77,7 +78,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
 
         if (WindowManagerPolicy.ACTION_HDMI_HW_PLUGGED.equals(intent.getAction())) {
             //Log.d(TAG, "onReceive: " + intent.getAction());
-            boolean plugged = intent.getBooleanExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false); 
+            boolean plugged = intent.getBooleanExtra(WindowManagerPolicy.EXTRA_HDMI_HW_PLUGGED_STATE, false); 
             if(plugged){
                 NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
                 
@@ -196,12 +197,12 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
         try {
             KeyEvent down = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, eventCode, 0);
             KeyEvent up = new KeyEvent(now, now, KeyEvent.ACTION_UP, eventCode, 0);
-            (IWindowManager.Stub
-                .asInterface(ServiceManager.getService("window")))
-                .injectInputEventNoWait(down);
-            (IWindowManager.Stub
-                .asInterface(ServiceManager.getService("window")))
-                .injectInputEventNoWait(up);
+            (IInputManager.Stub
+                .asInterface(ServiceManager.getService("input")))
+                .injectInputEvent(down, 0);
+            (IInputManager.Stub
+                .asInterface(ServiceManager.getService("input")))
+                .injectInputEvent(up, 0);
         } catch (RemoteException e) {
             Log.i(TAG, "DeadOjbectException");
         }
