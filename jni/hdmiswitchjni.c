@@ -8,6 +8,14 @@
 
 #include "hdmiswitchjni.h"
 
+#ifndef LOGD
+    #define LOGV ALOGV
+    #define LOGD ALOGD
+    #define LOGI ALOGI
+    #define LOGW ALOGW
+    #define LOGE ALOGE
+#endif
+
 #define  FBIOPUT_OSD_FREE_SCALE_ENABLE	0x4504
 #define  FBIOPUT_OSD_FREE_SCALE_WIDTH	0x4505
 #define  FBIOPUT_OSD_FREE_SCALE_HEIGHT	0x4506
@@ -102,7 +110,7 @@ int freeScale(int mode) {
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);		
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);	
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 			if((fd_ppmgr >= 0)&&(find_flag)){
 				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 			}
@@ -125,11 +133,11 @@ int freeScale(int mode) {
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);				
 			if((fd_ppmgr >= 0)&&(find_flag)){
 				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 			}
-			if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));		
+			if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));
 			ret = 0;
 			break;
 		case 2: //720p
@@ -149,11 +157,11 @@ int freeScale(int mode) {
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);			;	
 			if((fd_ppmgr >= 0)&&(find_flag)){
 				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 			}
-			if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));			
+			if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));
 			ret = 0;
 			break;
 		case 3: //1080i			
@@ -173,11 +181,11 @@ int freeScale(int mode) {
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
 			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);	
+			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);				
 			if((fd_ppmgr >= 0)&&(find_flag)){
 				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 			}
-			if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));			
+			if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));
 			ret = 0;
 			break;	
 		default:			
