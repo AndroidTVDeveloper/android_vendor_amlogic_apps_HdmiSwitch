@@ -721,7 +721,7 @@ public class HdmiSwitch extends Activity {
                 writeSysfs(FB2_CLONE_PATH, "1");
                 writeSysfs(MODE_PATH_VOUT2, "null");
                 writeSysfs(MODE_PATH_VOUT2, "panel");
-                writeSysfs(REG_PATH, "2");
+                //writeSysfs(REG_PATH, "2");
                 writeSysfs(FB2_BLANK_PATH, "0");
             } else {
                 writeSysfs(FB2_BLANK_PATH, "1");
@@ -785,7 +785,7 @@ public class HdmiSwitch extends Activity {
                 writeSysfs(FB2_CLONE_PATH, "1");
                 writeSysfs(MODE_PATH_VOUT2, "null");
                 writeSysfs(MODE_PATH_VOUT2, "panel");
-                writeSysfs(REG_PATH, "2");
+                //writeSysfs(REG_PATH, "2");
                 writeSysfs(FB2_BLANK_PATH, "0");
             } else {
                 writeSysfs(FB2_BLANK_PATH, "1");
