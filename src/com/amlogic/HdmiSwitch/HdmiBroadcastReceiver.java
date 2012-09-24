@@ -30,6 +30,8 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
 
     // Use a layout id for a unique identifier
     private static final int HDMI_NOTIFICATIONS = R.layout.main;
+    
+    private static final String ACTION_PLAYER_CRASHED = "com.farcore.videoplayer.PLAYER_CRASHED";
         
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -99,6 +101,10 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
                 nM.cancel(HDMI_NOTIFICATIONS); 
             }
+        }
+        
+        if (ACTION_PLAYER_CRASHED.equals(intent.getAction())) {
+            HdmiSwitch.onVideoPlayerCrashed();
         }
     }
     

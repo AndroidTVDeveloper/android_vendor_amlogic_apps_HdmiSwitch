@@ -1229,4 +1229,29 @@ public class HdmiSwitch extends Activity {
 		return 0;   	
     }    
     
+    /// patch for videoplayer crashed
+    private static final String OSD_BLANK_PATH = "/sys/class/graphics/fb0/blank";
+    private static final String OSD_BLOCK_MODE_PATH = "/sys/class/graphics/fb0/block_mode";
+        
+    public static int onVideoPlayerCrashed() {        
+        SystemProperties.set("vplayer.hideStatusBar.enable","false");
+        writeSysfs(OSD_BLANK_PATH, "0");
+        writeSysfs(OSD_BLOCK_MODE_PATH, "0"); 
+                  
+        if (!isHdmiConnected())
+            return 0; 
+            
+        if (!getCurMode().equals("panel")) {
+            if (getCurMode().equals("480p"))
+                EnableFreeScaleJni(1);  
+            else if (getCurMode().equals("720p"))
+                EnableFreeScaleJni(2);  
+            else if (getCurMode().equals("1080i"))
+                EnableFreeScaleJni(3);  
+            else if (getCurMode().equals("1080p"))
+                EnableFreeScaleJni(4);  
+        }    	
+        return 0;                     
+    }
+    
 }

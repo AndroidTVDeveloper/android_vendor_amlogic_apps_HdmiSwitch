@@ -23,6 +23,7 @@
 		 <intent-filter>
 			<action android:name="android.intent.action.BOOT_COMPLETED"/>
 			<action android:name="android.intent.action.HDMI_HW_PLUGGED"/>
+			<action android:name="com.farcore.videoplayer.PLAYER_CRASHED"/>
 		 </intent-filter>
 	 </receiver>
 	 <service android:name=".HdmiDelayedService" />  
