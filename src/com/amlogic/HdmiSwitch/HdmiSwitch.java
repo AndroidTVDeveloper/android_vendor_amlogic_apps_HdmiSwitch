@@ -546,10 +546,11 @@ public class HdmiSwitch extends Activity {
     		if (getCurMode().equals("panel")) { 
     			setFb0Blank("1");			
     			freeScaleSetModeJni(0);
-    			setFb0Blank("0");
+    			nap(3);    			
     			disableVideo(false);
     			setBrightness(briStr);
     			writeSysfs(REQUEST2XSCALE_PATH, "2");
+    			setFb0Blank("0");
     		}
     		else if (getCurMode().equals("480p")) {
     			if (freescaleOff)
@@ -610,6 +611,17 @@ public class HdmiSwitch extends Activity {
     	}
     	
     }
+
+    /**
+     * Sleep for a period of time.
+     * @param secs the number of seconds to sleep
+     */
+    private static void nap(int secs) {
+        try {
+            Thread.sleep(secs * 1000);
+        } catch (InterruptedException ignore) {
+        }
+    } 
     
     /** disable Hdmi*/
     public static int disableHdmi() {
