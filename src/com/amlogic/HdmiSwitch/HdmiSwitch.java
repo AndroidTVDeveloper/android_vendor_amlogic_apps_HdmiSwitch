@@ -1234,6 +1234,7 @@ public class HdmiSwitch extends Activity {
     private static final String OSD_BLOCK_MODE_PATH = "/sys/class/graphics/fb0/block_mode";
         
     public static int onVideoPlayerCrashed() {        
+        SystemProperties.set("vplayer.playing","false"); 
         SystemProperties.set("vplayer.hideStatusBar.enable","false");
         writeSysfs(OSD_BLANK_PATH, "0");
         writeSysfs(OSD_BLOCK_MODE_PATH, "0"); 
