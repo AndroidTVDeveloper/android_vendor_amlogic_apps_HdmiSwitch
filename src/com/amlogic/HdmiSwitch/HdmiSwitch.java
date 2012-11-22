@@ -546,7 +546,7 @@ public class HdmiSwitch extends Activity {
     		if (getCurMode().equals("panel")) { 
     			setFb0Blank("1");			
     			freeScaleSetModeJni(0);
-    			nap(3);    			
+    			nap(1);    			
     			disableVideo(false);
     			setBrightness(briStr);
     			writeSysfs(REQUEST2XSCALE_PATH, "2");
