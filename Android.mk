@@ -1,4 +1,4 @@
-ifeq ($(BOARD_USE_DEFAULT_HDMISWITCH),true)
+ifneq ($(BOARD_USE_DEFAULT_HDMISWITCH),false)
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
