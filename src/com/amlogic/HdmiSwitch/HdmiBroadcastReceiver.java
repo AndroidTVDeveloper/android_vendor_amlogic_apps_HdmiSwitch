@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import android.view.KeyEvent;
 import android.view.IWindowManager;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -116,6 +117,14 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                     Settings.System.HDMI_AUTO_SWITCH, 1);                
                 if (autoSwitchEnabled != 1)
                     return;
+                
+                // screen on
+                PowerManager powerManager = (PowerManager)context.getSystemService(
+                        context.POWER_SERVICE);
+                if (!powerManager.isScreenOn()) {
+                    Log.w(TAG, "onHdmiPlugged, screen is off");
+                    return;
+                }                        
                 
                 // camera in-use
                 String isCameraBusy = SystemProperties.get("camera.busy", "0");
