@@ -553,6 +553,7 @@ public class HdmiSwitch extends Activity {
     			setFb0Blank("0");
     		}
     		else if (getCurMode().equals("480p")) {
+    		    setFb0Blank("1");	
     			if (freescaleOff)
     			    DisableFreeScaleJni(1);
     			else
@@ -1107,6 +1108,7 @@ public class HdmiSwitch extends Activity {
                     setFb0Blank("0");
                 }
                 if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
+                    setFb0Blank("0");
                     writeSysfs(FB2_BLANK_PATH, "0");;
                 }                
             	break;            	
