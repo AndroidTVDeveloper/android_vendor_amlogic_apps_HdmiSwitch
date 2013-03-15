@@ -37,31 +37,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {						
-	        boolean plugged = false;
-	        // watch for HDMI plug messages if the hdmi switch exists
-	        if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {	
-	            final String filename = "/sys/class/switch/hdmi/state";
-	            FileReader reader = null;
-	            try {
-	                reader = new FileReader(filename);
-	                char[] buf = new char[15];
-	                int n = reader.read(buf);
-	                if (n > 1) {
-	                    plugged = 0 != Integer.parseInt(new String(buf, 0, n-1));
-	                }
-	            } catch (IOException ex) {
-	                Log.w(TAG, "Couldn't read hdmi state from " + filename + ": " + ex);
-	            } catch (NumberFormatException ex) {
-	                Log.w(TAG, "Couldn't read hdmi state from " + filename + ": " + ex);
-	            } finally {
-	                if (reader != null) {
-	                    try {
-	                        reader.close();
-	                    } catch (IOException ex) {
-	                    }
-	                }
-	            }
-	        }
+	        boolean plugged = isHdmiPlugged();
 	        
 	        if (plugged) {
                 NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
@@ -77,9 +53,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 nM.notify(HDMI_NOTIFICATIONS, notification);	        
 	        }
 	        		
-        }    	
-
-        if (WindowManagerPolicy.ACTION_HDMI_HW_PLUGGED.equals(intent.getAction())) {
+        } else if (WindowManagerPolicy.ACTION_HDMI_HW_PLUGGED.equals(intent.getAction())) {
             //Log.d(TAG, "onReceive: " + intent.getAction());
             boolean plugged = intent.getBooleanExtra(WindowManagerPolicy.EXTRA_HDMI_HW_PLUGGED_STATE, false); 
             if(plugged){
@@ -102,13 +76,45 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
                 nM.cancel(HDMI_NOTIFICATIONS); 
             }
-        }
-        
-        if (ACTION_PLAYER_CRASHED.equals(intent.getAction())) {
+        } else if (ACTION_PLAYER_CRASHED.equals(intent.getAction())) {
             HdmiSwitch.onVideoPlayerCrashed();
+        } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
+            if (SystemProperties.getBoolean("ro.app.hdmi.allswitch", false)) {
+                if (isHdmiPlugged()) onHdmiPlugged(context);
+            }
         }
     }
     
+    
+    private boolean isHdmiPlugged() {
+      boolean plugged = false;
+      // watch for HDMI plug messages if the hdmi switch exists
+      if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {	
+          final String filename = "/sys/class/switch/hdmi/state";
+          FileReader reader = null;
+          try {
+              reader = new FileReader(filename);
+              char[] buf = new char[15];
+              int n = reader.read(buf);
+              if (n > 1) {
+                  plugged = 0 != Integer.parseInt(new String(buf, 0, n-1));
+              }
+          } catch (IOException ex) {
+              Log.w(TAG, "Couldn't read hdmi state from " + filename + ": " + ex);
+          } catch (NumberFormatException ex) {
+              Log.w(TAG, "Couldn't read hdmi state from " + filename + ": " + ex);
+          } finally {
+              if (reader != null) {
+                  try {
+                      reader.close();
+                  } catch (IOException ex) {
+                  }
+              }
+          }
+      }
+      
+      return plugged;    
+    }
     
     private void onHdmiPlugged(Context context) {
         if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
