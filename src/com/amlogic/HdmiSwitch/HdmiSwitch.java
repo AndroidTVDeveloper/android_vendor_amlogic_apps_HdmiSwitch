@@ -390,19 +390,33 @@ public class HdmiSwitch extends Activity {
     
     /** check hdmi connection*/
     public static boolean isHdmiConnected() {    
-    	try {
-    		BufferedReader reader = new BufferedReader(new FileReader(DISP_CAP_PATH), 256);
-    		try {
-    			return (reader.readLine() == null)? false : true;     			
-    		} finally {
-    			reader.close();
-    		}   
-    		
-    	} catch (IOException e) { 
-    		Log.e(TAG, "IO Exception when read: " + DISP_CAP_PATH, e);   
-    		return false;
-    	}  
-    	
+      boolean plugged = false;
+      // watch for HDMI plug messages if the hdmi switch exists
+      if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {	
+          final String filename = "/sys/class/switch/hdmi/state";
+          FileReader reader = null;
+          try {
+              reader = new FileReader(filename);
+              char[] buf = new char[15];
+              int n = reader.read(buf);
+              if (n > 1) {
+                  plugged = 0 != Integer.parseInt(new String(buf, 0, n-1));
+              }
+          } catch (IOException ex) {
+              Log.w(TAG, "Couldn't read hdmi state from " + filename + ": " + ex);
+          } catch (NumberFormatException ex) {
+              Log.w(TAG, "Couldn't read hdmi state from " + filename + ": " + ex);
+          } finally {
+              if (reader != null) {
+                  try {
+                      reader.close();
+                  } catch (IOException ex) {
+                  }
+              }
+          }
+      }
+      
+      return plugged;
     }
     /** get all support mode*/
     private List<String> getAllMode() {
