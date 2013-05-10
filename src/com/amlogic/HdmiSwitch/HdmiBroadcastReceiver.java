@@ -163,6 +163,15 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                     return;
                 }                        
                 
+                // in suspend process
+                int brightness = Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS, 255);
+                if (brightness > Integer.parseInt(HdmiSwitch.getBrightness())) {
+                    Log.w(TAG, "onHdmiPlugged, in suspend process");
+                    return;
+                }
+                
+                
                 // camera in-use
                 String isCameraBusy = SystemProperties.get("camera.busy", "0");
                 if (!isCameraBusy.equals("0")) {
