@@ -111,6 +111,43 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     
     
     private void onHdmiPlugged(Context context) {
+        if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
+            if (HdmiSwitch.getCurMode().equals("null")) {
+                int autoSwitchEnabled = Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.HDMI_AUTO_SWITCH, 1);                
+                if (autoSwitchEnabled != 1)
+                    return;
+                
+                // camera in-use
+                String isCameraBusy = SystemProperties.get("camera.busy", "0");
+                if (!isCameraBusy.equals("0")) {
+                    Log.w(TAG, "onHdmiPlugged, camera is busy");
+                    Toast.makeText(context,
+                        context.getText(R.string.Toast_msg_camera_busy),
+                        Toast.LENGTH_LONG).show();                     
+                    return;
+                }
+                // keyguard on
+                KeyguardManager mKeyguardManager = (KeyguardManager) context.getSystemService(context.KEYGUARD_SERVICE); 
+            		if (mKeyguardManager != null && mKeyguardManager.inKeyguardRestrictedInputMode()) {
+            		    Log.w(TAG, "onHdmiPlugged, keyguard on");
+            			return;
+            		}
+            		                
+                if (SystemProperties.getBoolean("ro.vout.player.exit", true)) {
+                    /// send BACK key to stop other player
+                    sendKeyEvent(KeyEvent.KEYCODE_HOME);
+                }                
+                  
+                HdmiSwitch.setMode("720p");
+                Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+                it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, true);
+                context.sendStickyBroadcast(it);    		
+    	    }          
+            return;
+        }
+        
+
         if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
             if (HdmiSwitch.getCurMode().equals("panel")) {
                 int autoSwitchEnabled = Settings.System.getInt(context.getContentResolver(),
@@ -165,6 +202,21 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     }    
     
     private void onHdmiUnplugged(Context context) {
+        if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
+            if (!HdmiSwitch.getCurMode().equals("null")) {
+                if (SystemProperties.getBoolean("ro.vout.player.exit", true)) {
+                    /// send BACK key to stop other player
+                    sendKeyEvent(KeyEvent.KEYCODE_HOME);
+                }                  
+                
+                HdmiSwitch.setMode("null");
+                Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
+                it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
+                context.sendStickyBroadcast(it);                
+            }
+            return;
+        }
+        
          if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
              if (!HdmiSwitch.getCurMode().equals("panel")) {
                 

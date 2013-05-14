@@ -54,8 +54,10 @@ public class HdmiSwitch extends Activity {
     }
 	//public native static int scaleFrameBufferJni(int flag);	
 	public native static int freeScaleSetModeJni(int mode);
+	public native static int freeScaleForDisplay2Jni(int mode);
 	public native static int DisableFreeScaleJni(int mode);
 	public native static int EnableFreeScaleJni(int mode);
+	public native static int DisableFreeScaleForDisplay2Jni(int mode);	
 	
 	public static final String DISP_CAP_PATH = "/sys/class/amhdmitx/amhdmitx0/disp_cap";
 	public static final String MODE_PATH = "/sys/class/display/mode";
@@ -428,8 +430,12 @@ public class HdmiSwitch extends Activity {
     	   list.add("1080p"); 
     	   return list;
     	}
-    	
-    	list.add("panel");     	
+   	
+        if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
+            list.add("null");  
+        } else {    
+            list.add("panel");  
+        }   	
     	
     	//list.add("480i");
     	if(SystemProperties.getBoolean("ro.hdmi480p.enable", true)){
@@ -462,6 +468,22 @@ public class HdmiSwitch extends Activity {
 	/** get current mode*/
     public static String getCurMode() {
     	String modeStr;
+    	if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
+        	try {
+        		BufferedReader reader2 = new BufferedReader(new FileReader(MODE_PATH_VOUT2), 32);
+        		try {
+        			modeStr = reader2.readLine();  
+        		} finally {
+        			reader2.close();
+        		} 		
+        		return ((modeStr == null) || modeStr.equals(""))? "null" : modeStr;   	
+        		
+        	} catch (IOException e) { 
+        		Log.e(TAG, "IO Exception when read: " + MODE_PATH_VOUT2, e);
+        		return "null";
+        	}    	    
+    	}    	
+    	
     	if (SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
         	try {
         		BufferedReader reader2 = new BufferedReader(new FileReader(MODE_PATH_VOUT2), 32);
@@ -504,6 +526,11 @@ public class HdmiSwitch extends Activity {
 	    if (SystemProperties.getBoolean("ro.vout.dualdisplay", false))
 	        return;
 	        
+        if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
+            sendTvOutIntent(getCurMode().equals("null") ? false : true);
+            return;
+        }	        
+	        
 		if (getCurMode().equals("panel")) 
 			sendTvOutIntent(false);
 		else
@@ -513,6 +540,21 @@ public class HdmiSwitch extends Activity {
     /** set mode */
     public static int setMode(String modeStr) {   
     	//Log.i(TAG, "Set mode = " + modeStr);	
+    	if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
+    	    if (modeStr.equals("panel"))
+    	        modeStr = "null";
+    	        
+        	if (!modeStr.equals("null")) {
+        		if (!isHdmiConnected())
+        			return 0;
+        	}
+        	if (modeStr.equals(getCurMode()))
+        		return 0;  
+    		    	    
+    	    setDisplay2Mode(modeStr);
+    	    return 0;
+    	}    	
+    	
     	if (!modeStr.equals("panel")) {
     		if (!isHdmiConnected())
     			return 0;
@@ -636,6 +678,12 @@ public class HdmiSwitch extends Activity {
             Thread.sleep(secs * 1000);
         } catch (InterruptedException ignore) {
         }
+    }
+    private static void napMs(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ignore) {
+        }
     } 
     
     /** disable Hdmi*/
@@ -701,6 +749,28 @@ public class HdmiSwitch extends Activity {
         } catch (IOException e) { 
             Log.e(TAG, "IO Exception when write: " + path, e);
             return 1;
+        }                 
+    }
+    private static String readSysfs(String path) {
+        String val = null;
+        
+        if (!new File(path).exists()) {
+            Log.e(TAG, "File not found: " + path);
+            return null; 
+        }
+        
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(path), 64);
+            try {
+                val = reader.readLine();
+            } finally {
+                reader.close();
+            }    		
+            return val;
+        		
+        } catch (IOException e) { 
+            Log.e(TAG, "IO Exception when write: " + path, e);
+            return null;
         }                 
     }
     private void setDualDisplay(boolean hdmiPlugged) {
@@ -831,6 +901,123 @@ public class HdmiSwitch extends Activity {
             
         //writeSysfs(MODE_PATH_VOUT2, "null");
     }    
+    
+    private static final String FB2_ANGLE = "/sys/class/graphics/fb2/angle";
+    private static final String FB2_MODE = MODE_PATH_VOUT2;
+    private static final String FB2_VENC = "/sys/class/display2/venc_mux";
+    private static final String DISABLE_VIDEO = "/sys/class/video/disable_video";
+    private static final String VIDEO_DEV = "/sys/module/amvideo/parameters/cur_dev_idx";
+    private static final String PPMGR_DISP = "sys/class/ppmgr/disp";
+    private static final String PPMGR_ANGLE = "sys/class/ppmgr/angle";    
+          
+    public static void setDisplay2Mode(String mode) {
+        Log.d(TAG, "setDisplay2Mode---------------------" + mode);
+        boolean verPanel = SystemProperties.getBoolean("ro.vout.dualdisplay4.ver-panel", false);
+        boolean verPanelReverse = SystemProperties.getBoolean("ro.ver-panel.reverse", false);
+        
+        if (!mode.equals("null")) {
+            writeSysfs(VFM_CTRL_PATH, "add dual_display osd_ext amvideo4osd");
+            
+            writeSysfs(FB2_BLANK_PATH, "1");
+            writeSysfs(DISABLE_VIDEO, "1");
+            
+            writeSysfs(PPMGR_DISP, getFbSize(1)); 
+            if (verPanel) {                
+                writeSysfs(PPMGR_ANGLE, "0");
+            } 
+            
+            writeSysfs(FB2_CLONE_PATH, "0");
+            writeSysfs(FB2_MODE, mode);
+            freeScaleForDisplay2(mode);
+            if (verPanel) {
+                if (verPanelReverse)
+                    writeSysfs(FB2_ANGLE, "1");
+                else            
+                    writeSysfs(FB2_ANGLE, "3");
+            } else {
+                writeSysfs(FB2_ANGLE, "4");
+            }
+            writeSysfs(FB2_VENC, "0x8");
+            writeSysfs(FB2_CLONE_PATH, "1");
+            
+            writeSysfs(VIDEO_DEV, "1");                       
+            napMs(500);
+            writeSysfs(DISABLE_VIDEO, "2");
+
+                        
+            writeSysfs(FB2_BLANK_PATH, "0");
+            
+        } else {
+            writeSysfs(FB2_BLANK_PATH, "1");          
+            writeSysfs(DISABLE_VIDEO, "1");  
+            
+            writeSysfs(PPMGR_DISP, getFbSize(0)); 
+            if (verPanel) {
+                if (verPanelReverse)                
+                    writeSysfs(PPMGR_ANGLE, "3");
+                else
+                    writeSysfs(PPMGR_ANGLE, "1");
+            }
+            
+            writeSysfs(FB2_CLONE_PATH, "0");
+            writeSysfs(FB2_MODE, "null");
+            writeSysfs(FB2_VENC, "0x0");
+            freeScaleForDisplay2(mode);             
+
+            writeSysfs(VIDEO_DEV, "0");
+            napMs(300);
+            writeSysfs(DISABLE_VIDEO, "2");            
+        }
+    }
+    private static void freeScaleForDisplay2(String mode) {
+        boolean playerRunning = SystemProperties.getBoolean("vplayer.playing", false);
+        boolean playerExitWhenSwitch = SystemProperties.getBoolean("ro.vout.player.exit", true);
+        boolean freescaleOff = !playerExitWhenSwitch && playerRunning;        
+        
+        if (mode.equals("null")){
+            freeScaleForDisplay2Jni(0);
+        } else if (mode.equals("480p")) {
+            if(freescaleOff)
+                DisableFreeScaleForDisplay2Jni(1);
+            else
+                freeScaleForDisplay2Jni(1);
+        } else if (mode.equals("720p")) {
+            if(freescaleOff)
+                DisableFreeScaleForDisplay2Jni(2);
+            else
+                freeScaleForDisplay2Jni(2);
+        } else if (mode.equals("1080p")) {
+            if(freescaleOff)
+                DisableFreeScaleForDisplay2Jni(4);
+            else
+                freeScaleForDisplay2Jni(4);
+        }
+    }
+    
+    private static String getFbSize(int fb) {
+        String val = null;
+        
+        if (fb > 0) {
+            val = readSysfs("/sys/class/graphics/fb2/virtual_size");
+        } else {
+            val = readSysfs("/sys/class/graphics/fb0/virtual_size");
+        }
+        
+        if (val != null) {
+            String widthStr = null;
+            String heightStr = null;
+            int width, height;
+            widthStr = val.split(",")[0];
+            heightStr = val.split(",")[1];
+            if (widthStr != null && heightStr != null) {
+                width = Integer.parseInt(widthStr);
+                height = Integer.parseInt(heightStr);
+                return new String("" + width + " " + (height/2));
+            }
+        }
+        return null;
+    }
+    
     
     /** video layer control */
     private static int disableVideo(boolean disable) {
@@ -1076,6 +1263,12 @@ public class HdmiSwitch extends Activity {
             	break;
             	
             case 2:		// setMode finish, show confirm dialog
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
+    				notifyModeChanged();
+    				updateListDisplay(); 
+    				finish();                   
+                    break;
+                }
                 if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
                     boolean hdmiPlugged = !getCurMode().equals("panel");
                     if (hdmiPlugged) setFb0Blank("1");
@@ -1100,6 +1293,11 @@ public class HdmiSwitch extends Activity {
             	break;	
             	
             case 3:		// setMode finish
+                if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
+    				notifyModeChanged();
+    				updateListDisplay();
+                    break;
+                }            
                 if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
                     boolean hdmiPlugged = !getCurMode().equals("panel");
                     if (hdmiPlugged) setFb0Blank("1");
@@ -1135,6 +1333,7 @@ public class HdmiSwitch extends Activity {
 	private static final Map<String, String> MODE_AXIS_TABLE = new HashMap<String, String>();
 	static {
 		MODE_STR_TABLE.put("panel", R.string.mode_str_panel);
+		MODE_STR_TABLE.put("null", R.string.mode_str_panel);
 		//MODE_STR_TABLE.put("480i", R.string.mode_str_480i);
 		MODE_STR_TABLE.put("480p", R.string.mode_str_480p);
 		//MODE_STR_TABLE.put("576i", R.string.mode_str_576i);
@@ -1269,6 +1468,18 @@ public class HdmiSwitch extends Activity {
                   
         if (!isHdmiConnected())
             return 0; 
+            
+        if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
+            if (!getCurMode().equals("null")) {
+                if (getCurMode().equals("480p"))
+                    freeScaleForDisplay2Jni(1);  
+                else if (getCurMode().equals("720p"))
+                    freeScaleForDisplay2Jni(2);  
+                else if (getCurMode().equals("1080p"))
+                    freeScaleForDisplay2Jni(4);  
+            }             
+            return 0;
+        }            
             
         if (!getCurMode().equals("panel")) {
             if (getCurMode().equals("480p"))
