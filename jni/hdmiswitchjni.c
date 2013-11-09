@@ -6,6 +6,8 @@
 
 #include <cutils/log.h>
 #include <cutils/properties.h>
+#include "syswrite.h"
+
 
 #include "hdmiswitchjni.h"
 
@@ -23,6 +25,20 @@
 #define  FBIOPUT_OSD_FREE_SCALE_MODE  0x4511
 #define  FBIOPUT_OSD_WINDOW_AXIS  	0x4513
 
+//add for M8 cause premission changed
+#define SYSFS_VIDEO_AXIS 				("/sys/class/video/axis")
+#define SYSFS_VIDEO_DISABLE 			("/sys/class/video/disable_video")
+#define SYSFS_DISPLAY_AXIS 				("/sys/class/display/axis")
+#define SYSFS_PPMGR_PPSCALER			("/sys/class/ppmgr/ppscaler")
+#define SYSFS_PPMGR_PPSCALER_RECT	("/sys/class/ppmgr/ppscaler_rect")
+#define SYSFS_GRAPHIC_FB0_FS_AXIS		("/sys/class/graphics/fb0/free_scale_axis")
+#define SYSFS_GRAPHIC_FB0_FS			("/sys/class/graphics/fb0/free_scale")
+#define SYSFS_GRAPHIC_FB0_WIN_AXIS	("/sys/class/graphics/fb0/window_axis")
+#define SYSFS_GRAPHIC_FB0_FS_MODE		("/sys/class/graphics/fb0/freescale_mode")
+#define SYSFS_GRAPHIC_FB1_FS_AXIS		("/sys/class/graphics/fb1/free_scale_axis")
+#define SYSFS_GRAPHIC_FB1_FS			("/sys/class/graphics/fb1/free_scale")
+#define SYSFS_GRAPHIC_FB1_WIN_AXIS	("/sys/class/graphics/fb1/window_axis")
+
 struct fb_var_screeninfo vinfo;
 char daxis_str[32];
 char vaxis_str[80];
@@ -35,6 +51,7 @@ int freeScale(int mode) {
 	int fd_video = -1;
 	int fd_ppmgr = -1;
         int fd_ppmgr_rect = -1;
+	int osd_x = 0, osd_y = 0;	
 	int osd_width = 0, osd_height = 0;	
 	int ret = -1;
 	int x = 0, y = 0, w = 0, h = 0;
@@ -50,57 +67,11 @@ int freeScale(int mode) {
 		isM8 =1;
 		LOGI("hi,this is the new chip M8, treat it better.");
 	}
-	
-	//LOGI("freeScale: mode=%d", mode);
-	if((fd0 = open("/dev/graphics/fb0", O_RDWR)) < 0) {
-		LOGI("open /dev/graphics/fb0 fail.");
-		goto exit;
-	}
-	if((fd1 = open("/dev/graphics/fb1", O_RDWR)) < 0) {
-		LOGI("open /dev/graphics/fb1 fail.");
-		goto exit;		
-	}
-	if((fd_vaxis = open("/sys/class/video/axis", O_RDWR)) < 0) {
-		LOGI("open /sys/class/video/axis fail.");
-		goto exit;	
-	}
+
+	if(isM8) {
 		
-	if((fd_daxis = open("/sys/class/display/axis", O_RDWR)) < 0) {
-		LOGI("open /sys/class/display/axis fail.");
-		goto exit;	
-	}	
-
-	if((fd_fb = open("/dev/graphics/fb0", O_RDWR)) < 0) {
-		LOGI("open /dev/graphics/fb0 fail.");
-		goto exit;
-	}
-	
-	if((fd_video = open("/sys/class/video/disable_video", O_RDWR)) < 0) {
-		LOGI("open /sys/class/video/disable_video fail.");
-	}	
-		
-	if((fd_ppmgr = open("/sys/class/ppmgr/ppscaler", O_RDWR)) < 0) {
-		LOGI("open /sys/class/ppmgr/ppscaler fail.");	
-	}
-
-	if((fd_ppmgr_rect = open("/sys/class/ppmgr/ppscaler_rect", O_RDWR)) < 0) {
-		LOGI("open /sys/class/ppmgr/ppscaler_rect fail.");	
-	}
-	
-	if((fd_fsaxis = open("/sys/class/graphics/fb0/free_scale_axis", O_RDWR)) < 0) {
-		LOGI("open /sys/class/graphics/fb0/free_scale_axis fail.");
-		goto exit;	
-	}
-	
-	if((fd_winaxis= open("/sys/class/graphics/fb0/window_axis", O_RDWR)) < 0) {
-		LOGI("open /sys/class/graphics/fb0/window_axis fail.");
-		goto exit;	
-	}
-	
-
-	memset(vaxis_str,0,80);	
-	if(fd_vaxis>=0){
-		int ret_len = read(fd_vaxis, vaxis_str, sizeof(vaxis_str));
+		memset(vaxis_str,0,80);	
+		int ret_len = systemWriteReadNumSysfs(SYSFS_VIDEO_AXIS, vaxis_str, sizeof(vaxis_str));
 		if(ret_len>0){
 			if(sscanf(vaxis_str,"%d %d %d %d",&x,&y,&w,&h)>0){
 				w = w -x + 1;
@@ -109,179 +80,307 @@ int freeScale(int mode) {
 				LOGI("set mode: vaxis: x:%d, y:%d, w:%d, h:%d.",x,y,w,h);
 			}
 		}
-	}
 
-	memset(daxis_str,0,32);	
-	if(ioctl(fd_fb, FBIOGET_VSCREENINFO, &vinfo) == 0) {
-		osd_width = vinfo.xres;
-		osd_height = vinfo.yres;
-		sprintf(daxis_str, "0 0 %d %d 0 0 18 18", vinfo.xres, vinfo.yres);
-																									
-		//LOGI("osd_width = %d", osd_width);
-		//LOGI("osd_height = %d", osd_height);
-	} else {
-		LOGI("get FBIOGET_VSCREENINFO fail.");
-		goto exit;
-	}
+		memset(daxis_str,0,32);	
+		systemWriteReadNumSysfs(SYSFS_DISPLAY_AXIS, daxis_str, sizeof(daxis_str));
+		if (sscanf(daxis_str, "%d %d %d %d 0 0 32 32", &osd_x, &osd_y, &osd_width, &osd_height) == 4)
+		{
+			memset(freescale_str,0,32); 
+			sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
+			LOGI("freescale_str=%s\n", freescale_str);
+		}
+
+		switch(mode) {
+			//LOGI("set mid mode=%d", mode);
+
+			case 0:	//panel
+				systemWriteWriteSysfs(SYSFS_PPMGR_PPSCALER, "0");
+				//systemWriteWriteSysfs(fd_daxis, daxis_str, strlen(daxis_str));	
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB1_FS, "0");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "1");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB1_FS, "1");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB1_FS, "0");
+				LOGI("[wxl] write disable video 2.\n");
+				systemWriteWriteSysfs(SYSFS_VIDEO_DISABLE, "2");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_WIN_AXIS, freescale_str);
+				if(find_flag) {
+					systemWriteWriteSysfs(SYSFS_VIDEO_AXIS, vaxis_str);
+				}
+				ret = 0;
+			break;
 			
-	switch(mode) {
-		//LOGI("set mid mode=%d", mode);
-
-		case 0:	//panel
-			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
-			//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
-			write(fd_daxis, daxis_str, strlen(daxis_str));				
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);		
-			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-			if((fd_ppmgr >= 0)&&(find_flag)){
-				write(fd_vaxis, vaxis_str, strlen(vaxis_str));
-			}
-			//if (fd_video >= 0) 	write(fd_video, "2", strlen("2"));
-			ret = 0;
-			break;	
-		case 1: //480p
-			if(isM8==0)
-			{
-				if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
-				if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
-				if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
-				if(fd_ppmgr_rect >= 0)
-					write(fd_ppmgr_rect, "20 10 700 470 0", strlen("20 10 700 470 0"));
-				else if(fd_vaxis >= 0)
-					write(fd_vaxis, "20 10 700 470", strlen("20 10 700 470"));
-				write(fd_daxis, daxis_str, strlen(daxis_str));
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height); 
-				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);				
-				if((fd_ppmgr >= 0)&&(find_flag)){
-					write(fd_vaxis, vaxis_str, strlen(vaxis_str));
-				}
-				if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));
-			}
-			else
-			{
-				LOGI("-----jeff 480----");
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				
-				memset(freescale_str,0,32); 
-				sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
-				write(fd_fsaxis, freescale_str, strlen(freescale_str));
-				write(fd_winaxis, "20 10 700 470", strlen("20 10 700 470"));
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,"0x10001");
-			}
-			ret = 0;
+			case 1: //480p
+				LOGI("-----hdmi switch 480p----");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "0");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "1");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_AXIS, freescale_str);
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_WIN_AXIS, "20 10 700 470");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0x10001");
+				ret = 0;
 			break;
-		case 2: //720p
-		
-			if(isM8==0)
-			{
-				if (fd_ppmgr >= 0)	write(fd_ppmgr, "0", strlen("0"));
-							if (fd_video >= 0)	write(fd_video, "1", strlen("1"));
-							if (fd_ppmgr >= 0)	write(fd_ppmgr, "1", strlen("1"));
-							if(fd_ppmgr_rect >= 0)
-								write(fd_ppmgr_rect, "40 15 1240 705 0", strlen("40 15 1240 705 0"));
-							else if(fd_vaxis >= 0)
-								write(fd_vaxis, "40 15 1240 705", strlen("40 15 1240 705"));
-							write(fd_daxis, daxis_str, strlen(daxis_str));
-							ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-							ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-							ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-							ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
-							ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-							ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
-							if (fd_ppmgr >= 0)	write(fd_ppmgr, "1", strlen("1"));
-							ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-							ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1); 		;	
-							if((fd_ppmgr >= 0)&&(find_flag)){
-								write(fd_vaxis, vaxis_str, strlen(vaxis_str));
-							}
-							if ((fd_video >= 0)&&(fd_ppmgr >= 0))	write(fd_video, "2", strlen("2"));
-			}
-			else
-			{
-				LOGI("-----jeff 720p----");
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				
-				memset(freescale_str,0,32); 
-				sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
-				write(fd_fsaxis, freescale_str, strlen(freescale_str));
-				write(fd_winaxis, "40 15 1240 705", strlen("40 15 1240 705"));
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,"0x10001");
-				
-			}
-			ret = 0;
+			
+			case 2: //720p
+				LOGI("-----hdmi switch 720p----");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "0");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "1");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_AXIS, freescale_str); 
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_WIN_AXIS, "40 15 1240 705");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0x10001");
+				ret = 0;
 			break;
-		case 3: //1080i			
-		case 4: //1080p
-			if(isM8==0)
-			{
-				if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
-				if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
-				if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
-				if(fd_ppmgr_rect >= 0)
-					write(fd_ppmgr_rect, "40 20 1880 1060 0", strlen("40 20 1880 1060 0"));
-				else if(fd_vaxis >= 0)
-					write(fd_vaxis, "40 20 1880 1060", strlen("40 20 1880 1060"));
-				write(fd_daxis, daxis_str, strlen(daxis_str));
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
-				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
-				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
-				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);				
-				if((fd_ppmgr >= 0)&&(find_flag)){
-					write(fd_vaxis, vaxis_str, strlen(vaxis_str));
-				}
-				if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));
-			}
-			else
-			{
-				LOGI("-----jeff 1080p----");
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				
-				memset(freescale_str,0,32); 
-				sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
-				write(fd_fsaxis, freescale_str, strlen(freescale_str));
-				write(fd_winaxis, "40 20 1880 1060", strlen("40 20 1880 1060"));
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,"0x10001");
-				
-			}
-			ret = 0;
+			
+			case 3: //1080i			
+			case 4: //1080p
+				LOGI("-----hdmi switch 1080p----");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "0");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "1");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_AXIS, freescale_str);
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_WIN_AXIS, "40 20 1880 1060");
+				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0x10001");
+				ret = 0;
 			break;	
-		default:			
+			
+			default:			
 			break;		
-			
+
+		}
 	}
-	
-exit:	
-	close(fd0);
-	close(fd1);
-	close(fd_vaxis);
-	close(fd_daxis);	
-	close(fd_fb);
-	close(fd_video);
-	close(fd_ppmgr);
-	close(fd_ppmgr_rect);
+	else {
+		//LOGI("freeScale: mode=%d", mode);
+		if((fd0 = open("/dev/graphics/fb0", O_RDWR)) < 0) {
+			LOGI("open /dev/graphics/fb0 fail.");
+			goto exit;
+		}
+		if((fd1 = open("/dev/graphics/fb1", O_RDWR)) < 0) {
+			LOGI("open /dev/graphics/fb1 fail.");
+			goto exit;		
+		}
+		if((fd_vaxis = open("/sys/class/video/axis", O_RDWR)) < 0) {
+			LOGI("open /sys/class/video/axis fail.");
+			goto exit;	
+		}
+			
+		if((fd_daxis = open("/sys/class/display/axis", O_RDWR)) < 0) {
+			LOGI("open /sys/class/display/axis fail.");
+			goto exit;	
+		}	
+
+		if((fd_fb = open("/dev/graphics/fb0", O_RDWR)) < 0) {
+			LOGI("open /dev/graphics/fb0 fail.");
+			goto exit;
+		}
+		
+		if((fd_video = open("/sys/class/video/disable_video", O_RDWR)) < 0) {
+			LOGI("open /sys/class/video/disable_video fail.");
+		}	
+			
+		if((fd_ppmgr = open("/sys/class/ppmgr/ppscaler", O_RDWR)) < 0) {
+			LOGI("open /sys/class/ppmgr/ppscaler fail.");	
+		}
+
+		if((fd_ppmgr_rect = open("/sys/class/ppmgr/ppscaler_rect", O_RDWR)) < 0) {
+			LOGI("open /sys/class/ppmgr/ppscaler_rect fail.");	
+		}
+		
+		if((fd_fsaxis = open("/sys/class/graphics/fb0/free_scale_axis", O_RDWR)) < 0) {
+			LOGI("open /sys/class/graphics/fb0/free_scale_axis fail.");
+			goto exit;	
+		}
+		
+		if((fd_winaxis= open("/sys/class/graphics/fb0/window_axis", O_RDWR)) < 0) {
+			LOGI("open /sys/class/graphics/fb0/window_axis fail.");
+			goto exit;	
+		}
+		
+
+		memset(vaxis_str,0,80);	
+		if(fd_vaxis>=0){
+			int ret_len = read(fd_vaxis, vaxis_str, sizeof(vaxis_str));
+			if(ret_len>0){
+				if(sscanf(vaxis_str,"%d %d %d %d",&x,&y,&w,&h)>0){
+					w = w -x + 1;
+					h = h -y + 1;
+					find_flag = 1;	
+					LOGI("set mode: vaxis: x:%d, y:%d, w:%d, h:%d.",x,y,w,h);
+				}
+			}
+		}
+
+		memset(daxis_str,0,32);	
+		if(ioctl(fd_fb, FBIOGET_VSCREENINFO, &vinfo) == 0) {
+			osd_width = vinfo.xres;
+			osd_height = vinfo.yres;
+			sprintf(daxis_str, "0 0 %d %d 0 0 18 18", vinfo.xres, vinfo.yres);
+																										
+			//LOGI("osd_width = %d", osd_width);
+			//LOGI("osd_height = %d", osd_height);
+		} else {
+			LOGI("get FBIOGET_VSCREENINFO fail.");
+			goto exit;
+		}			
+				
+		switch(mode) {
+			//LOGI("set mid mode=%d", mode);
+
+			case 0:	//panel
+				if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
+				//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
+				write(fd_daxis, daxis_str, strlen(daxis_str));				
+				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
+				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);		
+				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+				if((fd_ppmgr >= 0)&&(find_flag)){
+					write(fd_vaxis, vaxis_str, strlen(vaxis_str));
+				}
+				//if (fd_video >= 0) 	write(fd_video, "2", strlen("2"));
+				ret = 0;
+				break;	
+			case 1: //480p
+				if(isM8==0)
+				{
+					if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
+					if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
+					if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
+					if(fd_ppmgr_rect >= 0)
+						write(fd_ppmgr_rect, "20 10 700 470 0", strlen("20 10 700 470 0"));
+					else if(fd_vaxis >= 0)
+						write(fd_vaxis, "20 10 700 470", strlen("20 10 700 470"));
+					write(fd_daxis, daxis_str, strlen(daxis_str));
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height); 
+					ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+					ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
+					ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);				
+					if((fd_ppmgr >= 0)&&(find_flag)){
+						write(fd_vaxis, vaxis_str, strlen(vaxis_str));
+					}
+					if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));
+				}
+				else
+				{
+					LOGI("-----jeff 480----");
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					
+					memset(freescale_str,0,32); 
+					sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
+					write(fd_fsaxis, freescale_str, strlen(freescale_str));
+					write(fd_winaxis, "20 10 700 470", strlen("20 10 700 470"));
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,"0x10001");
+				}
+				ret = 0;
+				break;
+			case 2: //720p
+				if(isM8==0)
+				{
+					if (fd_ppmgr >= 0)	write(fd_ppmgr, "0", strlen("0"));
+								if (fd_video >= 0)	write(fd_video, "1", strlen("1"));
+								if (fd_ppmgr >= 0)	write(fd_ppmgr, "1", strlen("1"));
+								if(fd_ppmgr_rect >= 0)
+									write(fd_ppmgr_rect, "40 15 1240 705 0", strlen("40 15 1240 705 0"));
+								else if(fd_vaxis >= 0)
+									write(fd_vaxis, "40 15 1240 705", strlen("40 15 1240 705"));
+								write(fd_daxis, daxis_str, strlen(daxis_str));
+								ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+								ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+								ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+								ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+								ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+								ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+								if (fd_ppmgr >= 0)	write(fd_ppmgr, "1", strlen("1"));
+								ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
+								ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1); 		;	
+								if((fd_ppmgr >= 0)&&(find_flag)){
+									write(fd_vaxis, vaxis_str, strlen(vaxis_str));
+								}
+								if ((fd_video >= 0)&&(fd_ppmgr >= 0))	write(fd_video, "2", strlen("2"));
+				}
+				else
+				{
+					LOGI("-----jeff 720p----");
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					
+					memset(freescale_str,0,32); 
+					sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
+					write(fd_fsaxis, freescale_str, strlen(freescale_str));
+					write(fd_winaxis, "40 15 1240 705", strlen("40 15 1240 705"));
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,"0x10001");					
+				}
+				ret = 0;
+				break;
+			case 3: //1080i			
+			case 4: //1080p
+				if(isM8==0)
+				{
+					if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
+					if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
+					if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
+					if(fd_ppmgr_rect >= 0)
+						write(fd_ppmgr_rect, "40 20 1880 1060 0", strlen("40 20 1880 1060 0"));
+					else if(fd_vaxis >= 0)
+						write(fd_vaxis, "40 20 1880 1060", strlen("40 20 1880 1060"));
+					write(fd_daxis, daxis_str, strlen(daxis_str));
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+					ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_WIDTH,osd_width);
+					ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_HEIGHT,osd_height);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
+					ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);				
+					if((fd_ppmgr >= 0)&&(find_flag)){
+						write(fd_vaxis, vaxis_str, strlen(vaxis_str));
+					}
+					if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));
+				}
+				else
+				{
+					LOGI("-----jeff 1080p----");
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					
+					memset(freescale_str,0,32); 
+					sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
+					write(fd_fsaxis, freescale_str, strlen(freescale_str));
+					write(fd_winaxis, "40 20 1880 1060", strlen("40 20 1880 1060"));
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,"0x10001");
+					
+				}
+				ret = 0;
+				break;	
+			default:			
+				break;		
+				
+		}
+		
+	exit:	
+		close(fd0);
+		close(fd1);
+		close(fd_vaxis);
+		close(fd_daxis);	
+		close(fd_fb);
+		close(fd_video);
+		close(fd_ppmgr);
+		close(fd_ppmgr_rect);
+		}
 	return ret;
 }
 	
