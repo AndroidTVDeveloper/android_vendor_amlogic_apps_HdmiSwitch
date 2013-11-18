@@ -10,6 +10,7 @@
 
 
 #include "hdmiswitchjni.h"
+#define LOG_TAG "Hdmiswitchjni"
 
 #ifndef LOGD
     #define LOGV ALOGV
@@ -43,6 +44,25 @@ struct fb_var_screeninfo vinfo;
 char daxis_str[32];
 char vaxis_str[80];
 
+int amsysfs_set_sysfs_str(const char *path, const char *val)
+{
+    int fd;
+    int bytes;
+    fd = open(path, O_CREAT | O_RDWR | O_TRUNC, 0644);
+    if (fd >= 0) {
+        bytes = write(fd, val, strlen(val));
+        ALOGI("amsysfs_set_sysfs_str %s= %s\n", path,val);
+        close(fd);
+        return 0;
+    } else {
+   	 ALOGI("open %s failed\n", path,val);
+    }
+    return -1;
+}
+
+
+static lastDisplayMode=0;
+
 int freeScale(int mode) {
 	int fd0 = -1, fd1 = -1;
 	int fd_daxis = -1, fd_vaxis = -1;
@@ -59,6 +79,7 @@ int freeScale(int mode) {
 	char freescale_str[32];
 
     int isM8 = 0;
+	int isPortrait =0;
 	char value[128];
 	memset(value, 0 ,128);
 	property_get("ro.product.model", value, "1");
@@ -67,6 +88,13 @@ int freeScale(int mode) {
 		isM8 =1;
 		LOGI("hi,this is the new chip M8, treat it better.");
 	}
+	memset(value, 0 ,128);
+	property_get("ro.screen.portrait", value, "0");
+	if(strstr(value,"true"))
+	{
+		isPortrait = 1;
+	}
+
 
 	if(isM8) {
 		
@@ -94,6 +122,8 @@ int freeScale(int mode) {
 			//LOGI("set mid mode=%d", mode);
 
 			case 0:	//panel
+				if(isPortrait==0)
+				{
 				systemWriteWriteSysfs(SYSFS_PPMGR_PPSCALER, "0");
 				//systemWriteWriteSysfs(fd_daxis, daxis_str, strlen(daxis_str));	
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0");
@@ -108,40 +138,262 @@ int freeScale(int mode) {
 				if(find_flag) {
 					systemWriteWriteSysfs(SYSFS_VIDEO_AXIS, vaxis_str);
 				}
+				}
+				else {
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+					amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
+					amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
+					amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x0");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+				}
 				ret = 0;
 			break;
 			
 			case 1: //480p
 				LOGI("-----hdmi switch 480p----");
+				if(isPortrait==0)
+				{
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "0");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "1");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_AXIS, freescale_str);
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_WIN_AXIS, "20 10 700 470");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0x10001");
+				}
+				else {
+					//if(lastDisplayMode!=0)
+					if(1)
+					{
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+						memset(freescale_str,0,32); 
+						sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
+
+						
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","480p");         //delete
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis",freescale_str);
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","20 10 700 470");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","0");
+
+						
+					}
+					else {
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","480p");		 //delete
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis","0 0 1024 768");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","0 0 719 479");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","0");
+			
+					}
+				}
 				ret = 0;
 			break;
 			
 			case 2: //720p
 				LOGI("-----hdmi switch 720p----");
+				if(isPortrait==0)
+				{
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "0");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "1");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_AXIS, freescale_str); 
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_WIN_AXIS, "40 15 1240 705");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0x10001");
+				}
+				else {
+					//if(lastDisplayMode!=0)
+					if(1)
+					{
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+						memset(freescale_str,0,32); 
+						sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
+
+					
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis",freescale_str);
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","40 15 1240 705");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","0");
+						
+					}
+					else {
+					
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","0 0 1279 719");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","0");
+
+					}
+				}
 				ret = 0;
 			break;
 			
 			case 3: //1080i			
 			case 4: //1080p
 				LOGI("-----hdmi switch 1080p----");
+				if(isPortrait==0)
+				{
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "0");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_MODE, "1");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS_AXIS, freescale_str);
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_WIN_AXIS, "40 20 1880 1060");
 				systemWriteWriteSysfs(SYSFS_GRAPHIC_FB0_FS, "0x10001");
+				}
+				else {
+					//if(lastDisplayMode!=0)
+					if(1)
+					{
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+						memset(freescale_str,0,32); 
+						sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
+						
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis",freescale_str);
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","40 20 1880 1060");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","1");
+ 					    amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","0");
+					}
+					else {
+						LOGI("-----jeff 1080p single----");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_canvas","0 0 1023 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis","0 0 1024 767");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","0 0 1919 1079");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/prot_on","1");
+ 					    amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","0");
+					}
+				}
 				ret = 0;
 			break;	
 			
@@ -149,6 +401,7 @@ int freeScale(int mode) {
 			break;		
 
 		}
+		lastDisplayMode = mode;
 	}
 	else {
 		//LOGI("freeScale: mode=%d", mode);
@@ -223,7 +476,7 @@ int freeScale(int mode) {
 			LOGI("get FBIOGET_VSCREENINFO fail.");
 			goto exit;
 		}			
-				
+				LOGI("set mid mode=%d  lastDisplayMode =%d", mode,lastDisplayMode);	
 		switch(mode) {
 			//LOGI("set mid mode=%d", mode);
 
@@ -625,6 +878,7 @@ int DisableFreeScale(int mode) {
 			ret = 0;
 			break;
 		case 2: //720p
+			LOGI("----disableFreescale 720p-----");
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
 			//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);

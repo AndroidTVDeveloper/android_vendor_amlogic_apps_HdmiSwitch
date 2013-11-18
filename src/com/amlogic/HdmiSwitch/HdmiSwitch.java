@@ -200,9 +200,13 @@ public class HdmiSwitch extends Activity {
                         }                                                         
                     }
 			        final String mode = (String)item.get("mode");
+			        
+			        Log.v(TAG,"handle creat mode "+mode);
 			        new Thread("setMode") {
 			            @Override
 			            public void run() {
+
+			            Log.v(TAG,"handle creat mode "+mode);
 		            		setMode(mode);
 		                    mProgressHandler.sendEmptyMessage(2);
 		                }
@@ -275,9 +279,12 @@ public class HdmiSwitch extends Activity {
 //                    	updateListDisplay();                     	
 //                    	notifyModeChanged();
 				        final String mode = old_mode;
+				        
+                        Log.v(TAG,"handle click mode "+mode);
 				        new Thread("setMode") {
 				            @Override
 				            public void run() {
+				             Log.v(TAG,"handle click mode "+mode);
 			            		setMode(mode);
 			                    mProgressHandler.sendEmptyMessage(3);
 			                }
@@ -539,7 +546,7 @@ public class HdmiSwitch extends Activity {
 	
     /** set mode */
     public static int setMode(String modeStr) {   
-    	//Log.i(TAG, "Set mode = " + modeStr);	
+    	Log.i(TAG, "Set mode 2 " + modeStr);	
     	if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
     	    if (modeStr.equals("panel"))
     	        modeStr = "null";
@@ -576,6 +583,28 @@ public class HdmiSwitch extends Activity {
     	    }    	        
 	        return 0;
 	    }
+
+        if(SystemProperties.getBoolean("ro.screen.portrait", false)==true)
+        {
+            Log.v(TAG,"----jeff------");
+        
+   if (modeStr.equals("panel")) { 
+                freeScaleSetModeJni(0);
+
+            }else if (modeStr.equals("480p")) {
+                freeScaleSetModeJni(1);
+
+            }else if (modeStr.equals("720p")) {
+                freeScaleSetModeJni(2);
+
+            }else if (modeStr.equals("1080i")) {
+                freeScaleSetModeJni(3);
+
+            }else if (modeStr.equals("1080p")) {
+                freeScaleSetModeJni(4);
+            }
+            return 0;
+        }
     	
     	try {
     		String briStr = "128";
@@ -878,17 +907,41 @@ public class HdmiSwitch extends Activity {
             } 
         } else if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
             if (hdmiPlugged && dualEnabled) {
-                writeSysfs(FB2_BLANK_PATH, "1");
-                writeSysfs(FB2_CLONE_PATH, "1");
-                writeSysfs(MODE_PATH_VOUT2, "null");
-                writeSysfs(MODE_PATH_VOUT2, "panel");
-                //writeSysfs(REG_PATH, "2");
-                writeSysfs(FB2_BLANK_PATH, "0");
+                if(SystemProperties.getBoolean("ro.screen.portrait", false)==false)
+                {
+                    writeSysfs(FB2_BLANK_PATH, "1");
+                    writeSysfs(FB2_CLONE_PATH, "1");
+                    writeSysfs(MODE_PATH_VOUT2, "null");
+                    writeSysfs(MODE_PATH_VOUT2, "panel");
+                    //writeSysfs(REG_PATH, "2");
+                    writeSysfs(FB2_BLANK_PATH, "0");              
+                }else
+                {
+                    Log.v(TAG,"setDualDisplayStatic 2 connect");
+                    /*
+                    writeSysfs(FB2_BLANK_PATH, "1");
+                    writeSysfs("/sys/class/graphics/fb0/blank", "1");
+                    writeSysfs("/sys/class/graphics/fb2/clone", "1");
+                    writeSysfs("/sys/class/display2/mode","panel");*/
+                }
+
             } else {
-                writeSysfs(FB2_BLANK_PATH, "1");
-                writeSysfs(FB2_CLONE_PATH, "0");
-                writeSysfs(MODE_PATH_VOUT2, "null");
-                //writeSysfs(REG_PATH, "0");            
+                if(SystemProperties.getBoolean("ro.screen.portrait", false)==false)
+                {
+                    writeSysfs(FB2_BLANK_PATH, "1");
+                    writeSysfs(FB2_CLONE_PATH, "0");
+                    writeSysfs(MODE_PATH_VOUT2, "null");
+                    //writeSysfs(REG_PATH, "0");     
+                 }else
+                 {
+                 
+                 Log.v(TAG,"setDualDisplayStatic  2 disconnect");
+                 /*
+                    writeSysfs("/sys/class/graphics/fb0/blank", "1");
+                    writeSysfs(FB2_BLANK_PATH, "1");
+                    writeSysfs("/sys/class/graphics/fb2/clone", "0");
+                    writeSysfs(MODE_PATH_VOUT2, "null");*/
+                 }
             }        
         } 	   	
     }    
@@ -1206,9 +1259,12 @@ public class HdmiSwitch extends Activity {
 //                	notifyModeChanged();
 //                	updateListDisplay();                 	
 			        final String mode = old_mode;
+			        Log.v(TAG,"handle message mode "+mode);
 			        new Thread("setMode") {
 			            @Override
 			            public void run() {
+
+			            Log.v(TAG,"handle message mode "+mode);
 		            		setMode(mode);
 		                    mProgressHandler.sendEmptyMessage(3);
 		                }    
@@ -1370,13 +1426,15 @@ public class HdmiSwitch extends Activity {
         }	
         
         /* panel <-> TV*/
-        if (getCurMode().equals("panel")) {  
+        if (getCurMode().equals("panel")) {
         	String mode = getBestMode();
+        	Log.v(TAG,"fast switch  best mode");
         	if (mode != null)
         		setMode(mode);
         	return 1;
         } else {
         	setMode("panel");
+        	Log.v(TAG,"fast switch to panel");
         	return 1;
         }   
 	}
