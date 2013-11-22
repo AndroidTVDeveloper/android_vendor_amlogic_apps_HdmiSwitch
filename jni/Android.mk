@@ -18,14 +18,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := libhdmiswitchjni
 LOCAL_MODULE_TAGS := optional
-LOCAL_SHARED_LIBRARIES := liblog libcutils 
-LOCAL_SHARED_LIBRARIES += libbinder \
-                          libsystemwriteservice \
-                          libutils
-LOCAL_SRC_FILES := hdmiswitchjni.c syswrite.cpp
-LOCAL_C_INCLUDES := $(LOCAL_PATH) \
-		$(JNI_H_INCLUDE) \
-		$(TOP)/frameworks/native/services \
-		$(TOP)/frameworks/native/include 
+LOCAL_SRC_FILES := hdmiswitchjni.c
+LOCAL_C_INCLUDES :=$(JNI_H_INCLUDE) 
+
+LOCAL_SHARED_LIBRARIES := liblog libcutils
 LOCAL_PRELINK_MODULE := false
 include $(BUILD_SHARED_LIBRARY)
