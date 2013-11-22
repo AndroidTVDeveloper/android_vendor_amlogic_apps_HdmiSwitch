@@ -431,8 +431,19 @@ public class HdmiSwitch extends Activity {
     private List<String> getAllMode() {
     	List<String> list = new ArrayList<String>();
     	String modeStr;
+
+        WindowManager mWm = (WindowManager)HdmiSwitch.this.getSystemService(Context.WINDOW_SERVICE);
+        Display display = mWm.getDefaultDisplay();
+        int mWScreenx = display.getWidth();
+        int mWScreeny = display.getHeight();
+        boolean skip480p = false;
+        if(((mWScreenx > 1920) && (mWScreeny > 1080)) || (( mWScreeny > 1920) && (mWScreenx > 1080))) {
+            skip480p = true;
+        }
+
     	if (SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
-    	   list.add("480p");
+          if(!skip480p)
+    	        list.add("480p");
     	   list.add("720p");
     	   list.add("1080p"); 
     	   return list;
@@ -446,6 +457,7 @@ public class HdmiSwitch extends Activity {
     	
     	//list.add("480i");
     	if(SystemProperties.getBoolean("ro.hdmi480p.enable", true)){
+            if(!skip480p)
     		list.add("480p");
     	}
     	list.add("720p");
