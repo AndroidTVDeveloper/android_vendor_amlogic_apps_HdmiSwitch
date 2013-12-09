@@ -251,7 +251,7 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
-						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis","0 0 1023 767");
@@ -269,7 +269,7 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
-						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis","0 0 1023 767");
@@ -350,7 +350,7 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
-						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis","0 0 1023 767");
@@ -369,7 +369,7 @@ int freeScale(int mode) {
 					amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 					amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
-					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","2");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","1");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis","0 0 1023 767");
@@ -452,7 +452,7 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
-						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis", "0 0 1023 767");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","40 20 1880 1060");
@@ -470,7 +470,7 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
-						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","2");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis","0 0 1023 767");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","0 0 1919 1079");
