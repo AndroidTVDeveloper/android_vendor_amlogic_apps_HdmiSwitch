@@ -200,7 +200,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                     /// send BACK key to stop other player
                     sendKeyEvent(KeyEvent.KEYCODE_HOME);
                 }
-                
+                Log.w(TAG, "onHdmiPlugged 720p");
                 HdmiSwitch.setMode("720p");
                 Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
                 it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, true);
