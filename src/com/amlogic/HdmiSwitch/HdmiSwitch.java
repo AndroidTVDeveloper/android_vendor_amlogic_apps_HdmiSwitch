@@ -635,10 +635,10 @@ public class HdmiSwitch extends Activity {
     			writer.close();
     		} 
     		
-    		boolean playerRunning = SystemProperties.getBoolean("vplayer.playing", false);
+    		/*boolean playerRunning = SystemProperties.getBoolean("vplayer.playing", false);
     		boolean playerExitWhenSwitch = SystemProperties.getBoolean("ro.vout.player.exit", true);
-    		boolean freescaleOff = !playerExitWhenSwitch && playerRunning;
-    		
+    		boolean freescaleOff = !playerExitWhenSwitch && playerRunning;*/
+    		boolean freescaleOff = false; //for android 4.3,we use new freescale mode ,and there is no need to disabele freescale when videoplay is running
     		//do free_scale    		
     		if (getCurMode().equals("panel")) { 
     			setFb0Blank("1");			

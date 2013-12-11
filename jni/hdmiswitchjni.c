@@ -236,12 +236,18 @@ int freeScale(int mode) {
 						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 						memset(freescale_str,0,32); 
 						sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
-						
+
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
 						amsysfs_set_sysfs_str("/sys/class/display/mode","480p");		 //delete
-						amsysfs_set_sysfs_str("/sys/class/display2/mode", "null");
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
@@ -332,9 +338,15 @@ int freeScale(int mode) {
 
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
 						amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
-						amsysfs_set_sysfs_str("/sys/class/display2/mode", "null");
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
@@ -425,12 +437,18 @@ int freeScale(int mode) {
 						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 						memset(freescale_str,0,32); 
 						sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
-
+						
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+						amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
+						amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
+						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
+
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
 						amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
-						amsysfs_set_sysfs_str("/sys/class/display2/mode", "null");
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
