@@ -153,7 +153,10 @@ int freeScale(int mode) {
 		LOGI("get FBIOGET_VSCREENINFO fail.");
 		goto exit;
 	}
-			LOGI("set mid mode=%d  lastDisplayMode =%d", mode,lastDisplayMode);	
+			LOGI("set mid mode=%d  lastDisplayMode =%d isPortrait=%d", mode,lastDisplayMode,isPortrait);	
+    char screen_orientation[128];
+    memset(screen_orientation, 0 ,128);
+    property_get("ro.screen.orientation", screen_orientation, "false");
 	switch(mode) {
 		case 0:	//panel
 			if(isPortrait==0)
@@ -161,12 +164,19 @@ int freeScale(int mode) {
 				if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
 				//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
 				write(fd_daxis, daxis_str, strlen(daxis_str));				
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+				/*ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);
 				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);		
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
+				amsysfs_set_sysfs_str("/sys/class/video/disable_video","1");
+				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
+				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0");
+				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","0");
+				amsysfs_set_sysfs_str("/sys/class/video/disable_video","0");
 				if((fd_ppmgr >= 0)&&(find_flag)){
 					write(fd_vaxis, vaxis_str, strlen(vaxis_str));
 				}
@@ -177,11 +187,11 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
+				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
 				amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
 				amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
 				amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
-				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
 			}
 			//if (fd_video >= 0) 	write(fd_video, "2", strlen("2"));
@@ -215,25 +225,26 @@ int freeScale(int mode) {
 			{
 				if(isPortrait==0)
 				{
-					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+					/*ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
-					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
-					
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
+
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 					memset(freescale_str,0,32); 
 					sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
 					write(fd_fsaxis, freescale_str, strlen(freescale_str));
 					write(fd_winaxis, "20 10 700 470", strlen("20 10 700 470"));
-					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,"0x10001");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
 				}else
 				{
 					//if(lastDisplayMode!=0)
 					if(1)
 					{
-						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+						/*ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
 						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
-						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
 						memset(freescale_str,0,32); 
 						sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
 
@@ -308,26 +319,29 @@ int freeScale(int mode) {
 				LOGI("-----jeff.yang 720p----");
 				if(isPortrait==0)
 				{
-					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+					/*ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
-					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
+
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 					
 					memset(freescale_str,0,32); 
 					sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
 					write(fd_fsaxis, freescale_str, strlen(freescale_str));
 					write(fd_winaxis, "40 15 1240 705", strlen("40 15 1240 705"));
-					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,"0x10001");			
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale", "0x10001");
+					amsysfs_set_sysfs_str("sys/class/video/axis", "40 15 1240 705");
 				}else
 				{
 
 					//if(lastDisplayMode!=0)
 					if(1)
 					{
-						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+						/*ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
 						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
-						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
 						memset(freescale_str,0,32); 
 						sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
 
@@ -340,6 +354,9 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
+                        if(strstr(screen_orientation,"true"))
+						    amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","2");
+                        else
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
@@ -406,25 +423,27 @@ int freeScale(int mode) {
 			{
 				if(isPortrait==0)
 				{
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+				/*ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
+				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 				
 				memset(freescale_str,0,32); 
 				sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
 				write(fd_fsaxis, freescale_str, strlen(freescale_str));
 				write(fd_winaxis, "40 20 1880 1060", strlen("40 20 1880 1060"));
-				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,"0x10001");
+				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale", "0x10001");
+				amsysfs_set_sysfs_str("sys/class/video/axis", "40 20 1880 1060");
 				}else
 				{
 					//if(lastDisplayMode!=0)
 					if(1)
 					{
-						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
+						/*ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,0);
 						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
-						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
+						ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
 						memset(freescale_str,0,32); 
 						sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
 						
@@ -437,8 +456,13 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
-						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","1");
+                        if(strstr(screen_orientation,"true"))
+						    amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","2"); 
+                        else
+						    amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_angle","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","1");
+						
+						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis", "0 0 1023 767");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","40 20 1880 1060");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");

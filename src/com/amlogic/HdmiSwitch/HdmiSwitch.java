@@ -78,6 +78,7 @@ public class HdmiSwitch extends Activity {
 	public static final String DISABLE_VIDEO_PATH = "/sys/class/video/disable_video";
 	public static final String REQUEST2XSCALE_PATH = "/sys/class/graphics/fb0/request2XScale";
 	
+    public static final String WINDOW_AXIS = "/sys/class/graphics/fb0/window_axis";
 	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
 	//public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
 	
@@ -577,6 +578,9 @@ public class HdmiSwitch extends Activity {
     	if (!modeStr.equals("panel")) {
     		if (!isHdmiConnected())
     			return 0;
+    	}else {
+    	//if mode is reset to 'panel',we need to reset window_axis to zero avoid libplayer changing video/axis 
+    	writeSysfs(WINDOW_AXIS,"0 0 0 0");
     	}
     	if (modeStr.equals(getCurMode()))
     		return 0; 
@@ -596,7 +600,7 @@ public class HdmiSwitch extends Activity {
 	        return 0;
 	    }
 
-        if(SystemProperties.getBoolean("ro.screen.portrait", false)==true)
+       /* if(SystemProperties.getBoolean("ro.screen.portrait", false)==true)
         {
             Log.v(TAG,"----jeff------");
         
@@ -616,7 +620,7 @@ public class HdmiSwitch extends Activity {
                 freeScaleSetModeJni(4);
             }
             return 0;
-        }
+        }*/
     	
     	try {
     		String briStr = "128";

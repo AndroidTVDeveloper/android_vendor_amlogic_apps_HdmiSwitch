@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import android.hardware.input.IInputManager;
-
+import android.app.SystemWriteManager;
 public class HdmiBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = "HdmiBroadcastReceiver";
 
@@ -33,12 +33,13 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     private static final int HDMI_NOTIFICATIONS = R.layout.main;
     
     private static final String ACTION_PLAYER_CRASHED = "com.farcore.videoplayer.PLAYER_CRASHED";
-        
+    private static SystemWriteManager sw = null; 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {						
 	        boolean plugged = isHdmiPlugged();
-	        
+	        sw = (SystemWriteManager) context.getSystemService("system_write");
+            resetFreescaleStatus();
 	        if (plugged) {
                 NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
                 
@@ -287,6 +288,17 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 .injectInputEvent(up, 0);
         } catch (RemoteException e) {
             Log.i(TAG, "DeadOjbectException");
+        }
+    }
+
+    private void resetFreescaleStatus(){
+        //when system power up, we need to reset freescale status in case the screen is crash
+        if(sw.readSysfs("/sys/class/graphics/fb0/free_scale").contains("0x1")){
+            //Log.d(TAG, "freescale has open,which means hdmi is plugging in .So don't set it");
+            return;
+        }else{
+            sw.writeSysfs("/sys/class/graphics/fb0/freescale_mode", "0");
+            sw.writeSysfs("/sys/class/graphics/fb0/free_scale","0");
         }
     }
 
