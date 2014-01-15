@@ -625,7 +625,7 @@ public class HdmiSwitch extends Activity {
     			briStr = getBrightness();
     			setBrightness("0");
     			setFb0Blank("1");
-    			disableVideo(true);
+    			//disableVideo(true);
     		}
     		
     		BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
@@ -644,7 +644,7 @@ public class HdmiSwitch extends Activity {
     			setFb0Blank("1");			
     			freeScaleSetModeJni(0);
     			nap(1);    			
-    			disableVideo(false);
+    			//disableVideo(false);
     			setBrightness(briStr);
     			writeSysfs(REQUEST2XSCALE_PATH, "2");
     			setFb0Blank("0");
