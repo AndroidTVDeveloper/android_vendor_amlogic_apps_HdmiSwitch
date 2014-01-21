@@ -628,8 +628,8 @@ public class HdmiSwitch extends Activity {
     			disableHdmi();
     			briStr = getBrightness();
     			setBrightness("0");
-    			setFb0Blank("1");
-    			//disableVideo(true);
+    			//setFb0Blank("1");
+    			disableVideo(true);
     		}
     		
     		BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
@@ -637,39 +637,39 @@ public class HdmiSwitch extends Activity {
     			writer.write(modeStr + "\r\n");    			
     		} finally {
     			writer.close();
-    		} 
+    		}
     		
     		/*boolean playerRunning = SystemProperties.getBoolean("vplayer.playing", false);
     		boolean playerExitWhenSwitch = SystemProperties.getBoolean("ro.vout.player.exit", true);
     		boolean freescaleOff = !playerExitWhenSwitch && playerRunning;*/
     		boolean freescaleOff = false; //for android 4.3,we use new freescale mode ,and there is no need to disabele freescale when videoplay is running
     		//do free_scale    		
-    		if (getCurMode().equals("panel")) { 
-    			setFb0Blank("1");			
+    		if (modeStr.equals("panel")) {
+    			//setFb0Blank("1");
     			freeScaleSetModeJni(0);
-    			nap(1);    			
-    			//disableVideo(false);
+    			//nap(1);
+    			disableVideo(false);
     			setBrightness(briStr);
     			writeSysfs(REQUEST2XSCALE_PATH, "2");
-    			setFb0Blank("0");
+    			//setFb0Blank("0");
     		}
-    		else if (getCurMode().equals("480p")) {
+    		else if (modeStr.equals("480p")) {
     		    setFb0Blank("1");	
     			if (freescaleOff)
     			    DisableFreeScaleJni(1);
     			else
     			    freeScaleSetModeJni(1);  
-    		} else if (getCurMode().equals("720p")) {
+    		} else if (modeStr.equals("720p")) {
     			if (freescaleOff)
     			    DisableFreeScaleJni(2);
     			else    		    
     			    freeScaleSetModeJni(2);  
-    		} else if (getCurMode().equals("1080i")) {
+    		} else if (modeStr.equals("1080i")) {
     			if (freescaleOff)
     			    DisableFreeScaleJni(3);
     			else    		    
     			    freeScaleSetModeJni(3);  
-    		} else if (getCurMode().equals("1080p")) {
+    		} else if (modeStr.equals("1080p")) {
     			if (freescaleOff)
     			    DisableFreeScaleJni(4);
     			else    		    
@@ -707,7 +707,7 @@ public class HdmiSwitch extends Activity {
     		
     		return 0;
     		
-    	} catch (IOException e) { 
+    	} catch (IOException e) {
     		Log.e(TAG, "IO Exception when write: " + MODE_PATH, e);    		
     		return 1;
     	}
@@ -733,6 +733,7 @@ public class HdmiSwitch extends Activity {
     
     /** disable Hdmi*/
     public static int disableHdmi() {
+    //Log.i(TAG, "--disableHdmi");	
     	try {
         	BufferedWriter writer = new BufferedWriter(new FileWriter(DISP_MODE_PATH), 32);
         		try {
@@ -1090,7 +1091,7 @@ public class HdmiSwitch extends Activity {
     
     /** video layer control */
     private static int disableVideo(boolean disable) {
-    	//Log.i(TAG, "disableVideo: " + disable);
+    	//Log.i(TAG, "---disableVideo: " + disable);
         File file = new File(DISABLE_VIDEO_PATH);
         if (!file.exists()) {        	
         	return 0;
@@ -1115,7 +1116,7 @@ public class HdmiSwitch extends Activity {
     
     /** set osd blank*/    
     public static int setFb0Blank(String blankStr) {
-    	//Log.i(TAG, "setFb0Blank: " + blankStr);
+    	//Log.i(TAG, "----setFb0Blank: " + blankStr);
         File file = new File(FB0_BLANK_PATH);
         if (!file.exists()) {        	
         	return 0;
@@ -1157,7 +1158,7 @@ public class HdmiSwitch extends Activity {
         
     /** set brightness*/
     public static int setBrightness(String briStr) {
-    	//Log.i(TAG, "setBrightness: " + briStr);
+    	//Log.i(TAG, "---setBrightness: " + briStr);
         File file = new File(BRIGHTNESS_PATH);
         if (!file.exists()) {        	
         	return 0;
@@ -1179,6 +1180,7 @@ public class HdmiSwitch extends Activity {
 	/** get brightness*/
     public static String getBrightness() {
     	String briStr = "128";
+        //Log.i(TAG, "--getBrightness");
         File file = new File(BRIGHTNESS_PATH);
         if (!file.exists()) {        	
         	return briStr;

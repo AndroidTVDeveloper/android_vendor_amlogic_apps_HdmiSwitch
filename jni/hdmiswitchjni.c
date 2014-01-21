@@ -32,10 +32,10 @@ int amsysfs_set_sysfs_str(const char *path, const char *val)
 {
     int fd;
     int bytes;
+    ALOGI("amsysfs_set_sysfs_str %s= %s\n", path,val);
     fd = open(path, O_CREAT | O_RDWR | O_TRUNC, 0644);
     if (fd >= 0) {
         bytes = write(fd, val, strlen(val));
-        ALOGI("amsysfs_set_sysfs_str %s= %s\n", path,val);
         close(fd);
         return 0;
     } else {
@@ -170,9 +170,9 @@ int freeScale(int mode) {
 				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,1);		
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 				ioctl(fd1,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
+				amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
 				amsysfs_set_sysfs_str("/sys/class/video/disable_video","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
-				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","0");
@@ -185,7 +185,6 @@ int freeScale(int mode) {
 			}else
 			{
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
-				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_on","0");
 				amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
@@ -230,6 +229,7 @@ int freeScale(int mode) {
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
 
+					amsysfs_set_sysfs_str("/sys/class/display/mode","480p");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 					memset(freescale_str,0,32); 
 					sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
@@ -324,6 +324,7 @@ int freeScale(int mode) {
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
 
+					amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 					
 					memset(freescale_str,0,32); 
@@ -427,6 +428,7 @@ int freeScale(int mode) {
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
+				amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
 				
 				memset(freescale_str,0,32); 
