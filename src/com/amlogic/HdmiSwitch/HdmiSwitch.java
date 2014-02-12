@@ -778,7 +778,7 @@ public class HdmiSwitch extends Activity {
     private static final String REG_PATH = "/sys/class/display2/venc_mux";    
     
     private static int writeSysfs(String path, String val) {
-        if (!new File(path).exists()) {
+       if (!new File(path).exists()) {
             Log.e(TAG, "File not found: " + path);
             return 1; 
         }
@@ -795,7 +795,7 @@ public class HdmiSwitch extends Activity {
         } catch (IOException e) { 
             Log.e(TAG, "IO Exception when write: " + path, e);
             return 1;
-        }                 
+        }                
     }
     private static String readSysfs(String path) {
         String val = null;
@@ -859,6 +859,7 @@ public class HdmiSwitch extends Activity {
                 writeSysfs(MODE_PATH_VOUT2, "null");
             } 
         } else if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
+            if (SystemProperties.getBoolean("ro.module.dualscaler", false)){
             if (hdmiPlugged && (getDualDisplayState() == 1)) {
                 writeSysfs(FB2_BLANK_PATH, "1");
                 writeSysfs(FB2_CLONE_PATH, "1");
@@ -871,7 +872,8 @@ public class HdmiSwitch extends Activity {
                 writeSysfs(FB2_CLONE_PATH, "0");
                 writeSysfs(MODE_PATH_VOUT2, "null");
                 //writeSysfs(REG_PATH, "0");            
-            }        
+            }   
+            }     
         } 	
     }
     
