@@ -778,7 +778,7 @@ public class HdmiSwitch extends Activity {
     private static final String FB2_CLONE_PATH = "/sys/class/graphics/fb2/clone";
     private static final String REG_PATH = "/sys/class/display2/venc_mux";    
     
-    private static int writeSysfs(String path, String val) {
+    private static int writeSysfs(String path, String val) { 
        if (!new File(path).exists()) {
             Log.e(TAG, "File not found: " + path);
             return 1; 
@@ -864,8 +864,8 @@ public class HdmiSwitch extends Activity {
             if (hdmiPlugged && (getDualDisplayState() == 1)) {
                 writeSysfs(FB2_BLANK_PATH, "1");
                 writeSysfs(FB2_CLONE_PATH, "1");
-                writeSysfs(MODE_PATH_VOUT2, "null");
-                writeSysfs(MODE_PATH_VOUT2, "panel");
+                //writeSysfs(MODE_PATH_VOUT2, "null");
+                //writeSysfs(MODE_PATH_VOUT2, "panel");
                 //writeSysfs(REG_PATH, "2");
                 writeSysfs(FB2_BLANK_PATH, "0");
             } else {
