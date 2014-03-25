@@ -6,7 +6,7 @@
 
 #include <cutils/log.h>
 #include <cutils/properties.h>
-
+#include <sys/wait.h>
 #include "hdmiswitchjni.h"
 #define LOG_TAG "Hdmiswitchjni"
 
@@ -208,6 +208,8 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
 				amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
+				//sleep(1);
+				usleep(1000*60);
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
 			}
 			}
