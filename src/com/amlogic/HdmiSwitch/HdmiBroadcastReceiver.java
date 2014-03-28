@@ -55,8 +55,9 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
 	        }
 	        		
         } else if (WindowManagerPolicy.ACTION_HDMI_HW_PLUGGED.equals(intent.getAction())) {
-            //Log.d(TAG, "onReceive: " + intent.getAction());
+            
             boolean plugged = intent.getBooleanExtra(WindowManagerPolicy.EXTRA_HDMI_HW_PLUGGED_STATE, false); 
+            Log.d(TAG, "onReceive: " + plugged+" "+System.currentTimeMillis());
             if(plugged){
                 NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
                 
@@ -72,6 +73,13 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 onHdmiPlugged(context);
                 
             }else{
+                try {
+                    Thread.currentThread().sleep(500);
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+                if(isHdmiPlugged())
+                    return;
                 onHdmiUnplugged(context);
                  
                 NotificationManager nM = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
