@@ -34,9 +34,12 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     
     private static final String ACTION_PLAYER_CRASHED = "com.farcore.videoplayer.PLAYER_CRASHED";
     private static SystemWriteManager sw = null; 
+    private boolean mSystemReady = false;
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {						
+    Log.d(TAG, "onReceive: " + intent.getAction());
+        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {	
+            mSystemReady = true;
 	        boolean plugged = isHdmiPlugged();
 	        sw = (SystemWriteManager) context.getSystemService("system_write");
             resetFreescaleStatus();
@@ -51,9 +54,9 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                 PendingIntent contentIntent = PendingIntent.getActivity(context, 0, it, 0);        
                 notification.setLatestEventInfo(context, context.getText(R.string.app_name), text, contentIntent);
 
-                nM.notify(HDMI_NOTIFICATIONS, notification);	        
-	        }
-	        		
+                nM.notify(HDMI_NOTIFICATIONS, notification);
+                onHdmiPlugged(context);
+	        }  		
         } else if (WindowManagerPolicy.ACTION_HDMI_HW_PLUGGED.equals(intent.getAction())) {
             
             boolean plugged = intent.getBooleanExtra(WindowManagerPolicy.EXTRA_HDMI_HW_PLUGGED_STATE, false); 
@@ -88,6 +91,7 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
         } else if (ACTION_PLAYER_CRASHED.equals(intent.getAction())) {
             HdmiSwitch.onVideoPlayerCrashed();
         } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
+        mSystemReady = true;
             if (SystemProperties.getBoolean("ro.app.hdmi.allswitch", false)) {
                 if (isHdmiPlugged()) onHdmiPlugged(context);
             }
@@ -148,7 +152,9 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
             		    Log.w(TAG, "onHdmiPlugged, keyguard on");
             			return;
             		}
-            		                
+                Log.w(TAG, "onHdmiPlugged-----www-----:"+mSystemReady);
+            	if(!mSystemReady)
+                    return;
                 if (SystemProperties.getBoolean("ro.vout.player.exit", true)) {
                     /// send BACK key to stop other player
                     sendKeyEvent(KeyEvent.KEYCODE_HOME);
@@ -197,8 +203,9 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                     return;
                 }
                 // keyguard on
+                boolean mNotCheckKygd = SystemProperties.getBoolean("ro.module.dualscaler", false);
                 KeyguardManager mKeyguardManager = (KeyguardManager) context.getSystemService(context.KEYGUARD_SERVICE); 
-        		if (mKeyguardManager != null && mKeyguardManager.inKeyguardRestrictedInputMode()) {
+        		if (mKeyguardManager != null && mKeyguardManager.inKeyguardRestrictedInputMode()&& !mNotCheckKygd) {
         		    Log.w(TAG, "onHdmiPlugged, keyguard on");
         			return;
         		}
