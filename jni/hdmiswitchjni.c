@@ -274,9 +274,13 @@ int freeScale(int mode) {
 					amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
 					amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
-					write(fd_fsaxis, freescale_str, strlen(osd_str));
+
+					memset(freescale_str,0,32);
+					sprintf(freescale_str, "0 0 %d %d ",osd_width, osd_height);
+					write(fd_fsaxis, osd_str, strlen(osd_str));
 					write(fd_winaxis, "20 10 700 470", strlen("20 10 700 470"));
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+					amsysfs_set_sysfs_str("sys/class/video/axis", "40 15 1240 705");
 				}else
 				{
 					//if(lastDisplayMode!=0)
