@@ -188,7 +188,7 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/free_scale","0x0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_clone","0");
-				amsysfs_set_sysfs_str("/sys/class/display/mode"," panel") ;
+				amsysfs_set_sysfs_str("/sys/class/display/mode","panel") ;
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
 			}else {
 			    if(isPortrait==0)
