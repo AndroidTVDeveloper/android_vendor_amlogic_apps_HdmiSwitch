@@ -622,7 +622,7 @@ public class HdmiSwitch extends Activity {
             return 0;
         }*/
     	
-    	try {
+    	//try {
     		String briStr = "128";
     		if (modeStr.equals("panel")) {
     			disableHdmi();
@@ -632,12 +632,12 @@ public class HdmiSwitch extends Activity {
     			disableVideo(true);
     		}
     		
-    		BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
+    		/*BufferedWriter writer = new BufferedWriter(new FileWriter(MODE_PATH), 32);
     		try {
     			writer.write(modeStr + "\r\n");    			
     		} finally {
     			writer.close();
-    		}
+    		}*/
     		
     		boolean playerRunning = SystemProperties.getBoolean("vplayer.playing", false);
     		boolean playerExitWhenSwitch = SystemProperties.getBoolean("ro.vout.player.exit", true);
@@ -708,10 +708,10 @@ public class HdmiSwitch extends Activity {
     		
     		return 0;
     		
-    	} catch (IOException e) {
+    	/*} catch (IOException e) {
     		Log.e(TAG, "IO Exception when write: " + MODE_PATH, e);    		
     		return 1;
-    	}
+    	}*/
     	
     }
 
