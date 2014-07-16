@@ -81,6 +81,13 @@ public class HdmiSwitch extends Activity {
     public static final String WINDOW_AXIS = "/sys/class/graphics/fb0/window_axis";
 	//public static final String SCALE_FB0_PATH = "/sys/class/graphics/fb0/scale";
 	//public static final String SCALE_FB1_PATH = "/sys/class/graphics/fb1/scale";
+
+    private static String propHdmi480p = "ro.hdmi480p.enable";
+    private static String propHdmi720p50Hz = "ro.hdmi720p50Hz.enable";
+    private static String propHdmi720p60Hz = "ro.hdmi720p60Hz.enable";
+    private static String propHdmi1080p24Hz = "ro.hdmi1080p24Hz.enable";
+    private static String propHdmi1080p50Hz = "ro.hdmi1080p50Hz.enable";
+    private static String propHdmi1080p60Hz = "ro.hdmi1080p60Hz.enable";
 	
 	private static final int CONFIRM_DIALOG_ID = 0;
 	private static final int MAX_PROGRESS = 15;
@@ -445,8 +452,11 @@ public class HdmiSwitch extends Activity {
     	if (SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
           if(!skip480p)
     	        list.add("480p");
-    	   list.add("720p");
-    	   list.add("1080p"); 
+           list.add("720p50hz");
+           list.add("720p");
+    	   list.add("1080p24hz");
+           list.add("1080p50hz");
+           list.add("1080p");
     	   return list;
     	}
    	
@@ -457,13 +467,26 @@ public class HdmiSwitch extends Activity {
         }   	
     	
     	//list.add("480i");
-    	if(SystemProperties.getBoolean("ro.hdmi480p.enable", true)){
+    	if(SystemProperties.getBoolean(propHdmi480p, true)){
             if(!skip480p)
     		list.add("480p");
     	}
-    	list.add("720p");
-    	//list.add("1080i");
-    	list.add("1080p");    
+        if(SystemProperties.getBoolean(propHdmi720p50Hz, false)) {
+    	    list.add("720p50hz");
+        }
+        if(SystemProperties.getBoolean(propHdmi720p60Hz, true)) {
+    	    list.add("720p");
+        }
+        if(SystemProperties.getBoolean(propHdmi1080p24Hz, false)) {
+    	    list.add("1080p24hz");
+        }
+        if(SystemProperties.getBoolean(propHdmi1080p50Hz, false)) {
+    	    list.add("1080p50hz");
+        }
+        if(SystemProperties.getBoolean(propHdmi1080p60Hz, true)) {
+    	    list.add("1080p");
+        }
+    	//list.add("1080i");   
     	/* 	
     	try {
     		BufferedReader reader = new BufferedReader(new FileReader(DISP_CAP_PATH), 256);
@@ -660,21 +683,36 @@ public class HdmiSwitch extends Activity {
     			    DisableFreeScaleJni(1);
     			else
     			    freeScaleSetModeJni(1);  
-    		} else if (modeStr.equals("720p")) {
+    		} else if (modeStr.equals("720p50hz")) {
     			if (freescaleOff)
     			    DisableFreeScaleJni(2);
     			else    		    
     			    freeScaleSetModeJni(2);  
-    		} else if (modeStr.equals("1080i")) {
+    		} else if (modeStr.equals("720p")) {
     			if (freescaleOff)
     			    DisableFreeScaleJni(3);
     			else    		    
     			    freeScaleSetModeJni(3);  
-    		} else if (modeStr.equals("1080p")) {
+    		} else if (modeStr.equals("1080i")) {
     			if (freescaleOff)
     			    DisableFreeScaleJni(4);
     			else    		    
     			    freeScaleSetModeJni(4);  
+    		} else if (modeStr.equals("1080p24hz")) {
+    			if (freescaleOff)
+    			    DisableFreeScaleJni(5);
+    			else    		    
+    			    freeScaleSetModeJni(5);  
+    		} else if (modeStr.equals("1080p50hz")) {
+    			if (freescaleOff)
+    			    DisableFreeScaleJni(6);
+    			else    		    
+    			    freeScaleSetModeJni(6);  
+    		} else if (modeStr.equals("1080p")) {
+    			if (freescaleOff)
+    			    DisableFreeScaleJni(7);
+    			else    		    
+    			    freeScaleSetModeJni(7);  
     		}
  		
     		
@@ -839,9 +877,9 @@ public class HdmiSwitch extends Activity {
                 }
                 writeSysfs(VIDEO2_CTRL_PATH, "1");
     
-                if (getCurMode().equals("720p")) {
+                if (getCurMode().equals("720p50hz") || getCurMode().equals("720p")) {
                     writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "640");
-                } else if (getCurMode().equals("1080p")) {
+                } else if (getCurMode().equals("1080p24hz") ||getCurMode().equals("1080p50hz") || getCurMode().equals("1080p")) {
                     writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "800");
                 } else {
                     writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
@@ -903,9 +941,9 @@ public class HdmiSwitch extends Activity {
                 }
                 writeSysfs(VIDEO2_CTRL_PATH, "1");
     
-                if (getCurMode().equals("720p")) {
+                if (getCurMode().equals("720p50hz") || getCurMode().equals("720p")) {
                     writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "640");
-                } else if (getCurMode().equals("1080p")) {
+                } else if (getCurMode().equals("1080p24hz") || getCurMode().equals("1080p50hz") || getCurMode().equals("1080p")) {
                     writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "800");
                 } else {
                     writeSysfs(VIDEO2_FRAME_WIDTH_PATH, "0");
@@ -1054,16 +1092,31 @@ public class HdmiSwitch extends Activity {
                 DisableFreeScaleForDisplay2Jni(1);
             else
                 freeScaleForDisplay2Jni(1);
-        } else if (mode.equals("720p")) {
+        } else if (mode.equals("720p50hz")) {
             if(freescaleOff)
                 DisableFreeScaleForDisplay2Jni(2);
             else
                 freeScaleForDisplay2Jni(2);
+        } else if (mode.equals("720p")) {
+            if(freescaleOff)
+                DisableFreeScaleForDisplay2Jni(3);
+            else
+                freeScaleForDisplay2Jni(3);
+        } else if (mode.equals("1080p24hz")) {
+            if(freescaleOff)
+                DisableFreeScaleForDisplay2Jni(5);
+            else
+                freeScaleForDisplay2Jni(5);
+        } else if (mode.equals("1080p50hz")) {
+            if(freescaleOff)
+                DisableFreeScaleForDisplay2Jni(6);
+            else
+                freeScaleForDisplay2Jni(6);
         } else if (mode.equals("1080p")) {
             if(freescaleOff)
-                DisableFreeScaleForDisplay2Jni(4);
+                DisableFreeScaleForDisplay2Jni(7);
             else
-                freeScaleForDisplay2Jni(4);
+                freeScaleForDisplay2Jni(7);
         }
     }
     
@@ -1415,9 +1468,12 @@ public class HdmiSwitch extends Activity {
 		MODE_STR_TABLE.put("480p", R.string.mode_str_480p);
 		//MODE_STR_TABLE.put("576i", R.string.mode_str_576i);
 		//MODE_STR_TABLE.put("576p", R.string.mode_str_576p);
-		MODE_STR_TABLE.put("720p", R.string.mode_str_720p);
+		MODE_STR_TABLE.put("720p50hz", R.string.mode_str_720p50hz);
+        MODE_STR_TABLE.put("720p", R.string.mode_str_720p);
 		//MODE_STR_TABLE.put("1080i", R.string.mode_str_1080i);
-		MODE_STR_TABLE.put("1080p", R.string.mode_str_1080p);		
+		MODE_STR_TABLE.put("1080p24hz", R.string.mode_str_1080p24hz);
+        MODE_STR_TABLE.put("1080p50hz", R.string.mode_str_1080p50hz);
+        MODE_STR_TABLE.put("1080p", R.string.mode_str_1080p);
 		
 		MODE_AXIS_TABLE.put("panel", "0 0 800 480 0 0 18 18");
 		MODE_AXIS_TABLE.put("480i", "0 0 800 480 0 0 18 18");
@@ -1509,12 +1565,18 @@ public class HdmiSwitch extends Activity {
     	if (!getCurMode().equals("panel")) {
     		if (getCurMode().equals("480p"))
     			DisableFreeScaleJni(1);  
-    		else if (getCurMode().equals("720p"))
-    			DisableFreeScaleJni(2);  
+    		else if (getCurMode().equals("720p50hz"))
+    			DisableFreeScaleJni(2);
+            else if (getCurMode().equals("720p"))
+    			DisableFreeScaleJni(3);
     		else if (getCurMode().equals("1080i"))
-    			DisableFreeScaleJni(3);  
-    		else if (getCurMode().equals("1080p"))
     			DisableFreeScaleJni(4);  
+    		else if (getCurMode().equals("1080p24hz"))
+    			DisableFreeScaleJni(5); 
+            else if (getCurMode().equals("1080p50hz"))
+    			DisableFreeScaleJni(6); 
+            else if (getCurMode().equals("1080p"))
+    			DisableFreeScaleJni(7); 
     	}    	
 		return 0;    	
     }
@@ -1523,14 +1585,20 @@ public class HdmiSwitch extends Activity {
 			return 0;
     	
     	if (!getCurMode().equals("panel")) {
-    		if (getCurMode().equals("480p"))
-    			EnableFreeScaleJni(1);  
-    		else if (getCurMode().equals("720p"))
-    			EnableFreeScaleJni(2);  
-    		else if (getCurMode().equals("1080i"))
-    			EnableFreeScaleJni(3);  
-    		else if (getCurMode().equals("1080p"))
-    			EnableFreeScaleJni(4);  
+            if (getCurMode().equals("480p"))
+                EnableFreeScaleJni(1);  
+            else if (getCurMode().equals("720p50hz"))
+                EnableFreeScaleJni(2); 
+            else if (getCurMode().equals("720p"))
+                EnableFreeScaleJni(3); 
+            else if (getCurMode().equals("1080i"))
+                EnableFreeScaleJni(4);  
+            else if (getCurMode().equals("1080p24hz"))
+                EnableFreeScaleJni(5); 
+            else if (getCurMode().equals("1080p50hz"))
+                EnableFreeScaleJni(6);
+            else if (getCurMode().equals("1080p"))
+                EnableFreeScaleJni(7);
     	}    	
 		return 0;   	
     }    
@@ -1552,10 +1620,16 @@ public class HdmiSwitch extends Activity {
             if (!getCurMode().equals("null")) {
                 if (getCurMode().equals("480p"))
                     freeScaleForDisplay2Jni(1);  
+                else if (getCurMode().equals("720p50hz"))
+                    freeScaleForDisplay2Jni(2);
                 else if (getCurMode().equals("720p"))
-                    freeScaleForDisplay2Jni(2);  
+                    freeScaleForDisplay2Jni(3);
+                else if (getCurMode().equals("1080p24hz"))
+                    freeScaleForDisplay2Jni(5);
+                else if (getCurMode().equals("1080p50hz"))
+                    freeScaleForDisplay2Jni(6); 
                 else if (getCurMode().equals("1080p"))
-                    freeScaleForDisplay2Jni(4);  
+                    freeScaleForDisplay2Jni(7); 
             }             
             return 0;
         }            
@@ -1563,12 +1637,18 @@ public class HdmiSwitch extends Activity {
         if (!getCurMode().equals("panel")) {
             if (getCurMode().equals("480p"))
                 EnableFreeScaleJni(1);  
+            else if (getCurMode().equals("720p50hz"))
+                EnableFreeScaleJni(2); 
             else if (getCurMode().equals("720p"))
-                EnableFreeScaleJni(2);  
+                EnableFreeScaleJni(3); 
             else if (getCurMode().equals("1080i"))
-                EnableFreeScaleJni(3);  
-            else if (getCurMode().equals("1080p"))
                 EnableFreeScaleJni(4);  
+            else if (getCurMode().equals("1080p24hz"))
+                EnableFreeScaleJni(5); 
+            else if (getCurMode().equals("1080p50hz"))
+                EnableFreeScaleJni(6);
+            else if (getCurMode().equals("1080p"))
+                EnableFreeScaleJni(7);
         }    	
         return 0;                     
     }

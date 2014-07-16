@@ -383,7 +383,8 @@ int freeScale(int mode) {
 			}
 			ret = 0;
 			break;
-		case 2: //720p
+		case 2: //720p50Hz
+		case 3: //720p60Hz
 		
 			if(isM8==0)
 			{
@@ -410,7 +411,12 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
 
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
-				amsysfs_set_sysfs_str("/sys/class/display/mode","720p");		 
+				if(mode == 2) {
+				    amsysfs_set_sysfs_str("/sys/class/display/mode","720p50hz");
+                }
+                else if(mode == 3){
+                    amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+                }		 
 				amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
 				amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");		 
 				amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
@@ -450,7 +456,12 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/free_scale","0x10001");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_update_pan","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","0");
-				amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+				if(mode == 2) {
+				    amsysfs_set_sysfs_str("/sys/class/display/mode","720p50hz");
+                }
+                else if(mode == 3){
+                    amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+                }
 				}
 			}
 			else
@@ -463,7 +474,12 @@ int freeScale(int mode) {
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
 					ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
 
-					amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+					if(mode == 2) {
+    				    amsysfs_set_sysfs_str("/sys/class/display/mode","720p50hz");
+                    }
+                    else if(mode == 3){
+                        amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+                    }
 					amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
 					amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
@@ -491,7 +507,12 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
 
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
-						amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+						if(mode == 2) {
+        				    amsysfs_set_sysfs_str("/sys/class/display/mode","720p50hz");
+                        }
+                        else if(mode == 3){
+                            amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+                        }
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
@@ -516,7 +537,12 @@ int freeScale(int mode) {
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
-					amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+					if(mode == 2) {
+    				    amsysfs_set_sysfs_str("/sys/class/display/mode","720p50hz");
+                    }
+                    else if(mode == 3){
+                        amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+                    }
 					amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 					amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
@@ -538,8 +564,10 @@ int freeScale(int mode) {
 			}
 			ret = 0;
 			break;
-		case 3: //1080i			
-		case 4: //1080p
+		case 4: //1080i			
+		case 5: //1080p24Hz
+		case 6: //1080p50Hz
+		case 7: //1080p60Hz
 			if(isM8==0)
 			{
 				if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
@@ -563,7 +591,15 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str ("/sys/class/graphics/fb0/blank","1");
 				amsysfs_set_sysfs_str ("/sys/class/graphics/fb2/blank","1");
 				amsysfs_set_sysfs_str ("/sys/class/graphics/fb2/clone","1");
-				amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p");
+                if(mode == 4 || mode == 7) {
+				    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p");
+                }
+                else if(mode == 5) {
+                    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p24hz");
+                }
+                else if(mode == 6) {
+                    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p50hz");
+                }
 				amsysfs_set_sysfs_str ("/sys/class/display2/mode","null");
 				amsysfs_set_sysfs_str ("/sys/class/display2/mode","panel");
 				amsysfs_set_sysfs_str ("/sys/class/display2/venc_mux","0x2");
@@ -602,7 +638,15 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/free_scale","0x10001");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_update_pan","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","0");
-				amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
+				if(mode == 4 || mode == 7) {
+				    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p");
+                }
+                else if(mode == 5) {
+                    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p24hz");
+                }
+                else if(mode == 6) {
+                    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p50hz");
+                }
 				}
 			}
 			else
@@ -613,7 +657,15 @@ int freeScale(int mode) {
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_MODE,1);
 				ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);*/
-				amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
+				if(mode == 4 || mode == 7) {
+				    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p");
+                }
+                else if(mode == 5) {
+                    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p24hz");
+                }
+                else if(mode == 6) {
+                    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p50hz");
+                }
 				amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
 				amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "0x1");
@@ -640,7 +692,15 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
 
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
-						amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
+						if(mode == 4 || mode == 7) {
+        				    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p");
+                        }
+                        else if(mode == 5) {
+                            amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p24hz");
+                        }
+                        else if(mode == 6) {
+                            amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p50hz");
+                        }
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","null");
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
@@ -666,7 +726,15 @@ int freeScale(int mode) {
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/blank","1");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb2/clone","1");
-						amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
+						if(mode == 4 || mode == 7) {
+        				    amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p");
+                        }
+                        else if(mode == 5) {
+                            amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p24hz");
+                        }
+                        else if(mode == 6) {
+                            amsysfs_set_sysfs_str ("/sys/class/display/mode","1080p50hz");
+                        }
 						amsysfs_set_sysfs_str("/sys/class/display2/mode","panel");
 						amsysfs_set_sysfs_str("/sys/class/display2/venc_mux","0x2");
 						amsysfs_set_sysfs_str("/sys/class/graphics/fb0/prot_canvas","0 0 767 1023");
@@ -808,7 +876,8 @@ int FreeScaleForDisplay2(int mode) {
 			//if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));
 			ret = 0;
 			break;
-		case 2: //720p
+		case 2: //720p50Hz
+		case 3: //720p60Hz
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
 			if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
@@ -828,8 +897,10 @@ int FreeScaleForDisplay2(int mode) {
 			//if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "2", strlen("2"));
 			ret = 0;
 			break;
-		case 3: //1080i			
-		case 4: //1080p
+		case 4: //1080i			
+		case 5: //1080p24Hz
+		case 6: //1080p50Hz
+		case 7: //1080p60Hz
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
 			if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
@@ -941,7 +1012,8 @@ int DisableFreeScale(int mode) {
 			if(fd_vaxis >= 0) write(fd_vaxis, "0 0 0 0", strlen("0 0 0 0"));
 			ret = 0;
 			break;
-		case 2: //720p
+		case 2: //720p50Hz
+		case 3: //720p60Hz
 			LOGI("----disableFreescale 720p-----");
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
 			//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
@@ -959,8 +1031,10 @@ int DisableFreeScale(int mode) {
 			if(fd_vaxis >= 0) write(fd_vaxis, "0 0 0 0", strlen("0 0 0 0"));
 			ret = 0;
 			break;
-		case 3: //1080i			
-		case 4: //1080p
+		case 4: //1080i			
+		case 5: //1080p24Hz
+		case 6: //1080p50Hz
+		case 7: //1080p60Hz
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
 			//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
@@ -1057,7 +1131,8 @@ int DisableFreeScaleFB2(int mode) {
 			if(fd_vaxis >= 0) write(fd_vaxis, "0 0 0 0", strlen("0 0 0 0"));
 			ret = 0;
 			break;
-		case 2: //720p
+		case 2: //720p50Hz
+		case 3: //720p60Hz
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
 			//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));	
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
@@ -1073,8 +1148,10 @@ int DisableFreeScaleFB2(int mode) {
 			if(fd_vaxis >= 0) write(fd_vaxis, "0 0 0 0", strlen("0 0 0 0"));
 			ret = 0;
 			break;
-		case 3: //1080i			
-		case 4: //1080p
+		case 4: //1080i			
+		case 5: //1080p24Hz
+		case 6: //1080p50Hz
+		case 7: //1080p60Hz
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
 			//if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
 			ioctl(fd0,FBIOPUT_OSD_FREE_SCALE_ENABLE,0);
@@ -1187,7 +1264,8 @@ int EnableFreeScale(int mode) {
 			if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "1", strlen("1"));			
 			ret = 0;
 			break;
-		case 2: //720p
+		case 2: //720p50Hz
+		case 3: //720p60Hz
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
 			if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
 			if(fd_ppmgr_rect >= 0){
@@ -1208,8 +1286,10 @@ int EnableFreeScale(int mode) {
 			if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	write(fd_video, "1", strlen("1"));
 			ret = 0;
 			break;
-		case 3: //1080i			
-		case 4: //1080p
+		case 4: //1080i			
+		case 5: //1080p24Hz
+		case 6: //1080p50Hz
+		case 7: //1080p60Hz
 			if (fd_ppmgr >= 0) 	write(fd_ppmgr, "1", strlen("1"));
 			if (fd_video >= 0) 	write(fd_video, "1", strlen("1"));
 			if(fd_ppmgr_rect >= 0){
