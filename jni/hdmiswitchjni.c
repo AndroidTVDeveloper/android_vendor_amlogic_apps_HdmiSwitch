@@ -183,14 +183,22 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/display/mode","panel");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
-			}else if(isSingleDisplay == 1){
-				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
-				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","1");
-				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/free_scale","0x0");
-				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_clone","0");
-				amsysfs_set_sysfs_str("/sys/class/display/mode","panel") ;
-				amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
-			}else {
+		    }else if(isSingleDisplay == 1){
+				if(isPortrait == 0){
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode", "1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x0");
+					amsysfs_set_sysfs_str("/sys/class/display/mode","panel") ;
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+				}else{
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb1/free_scale","0x0");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_clone","0");
+					amsysfs_set_sysfs_str("/sys/class/display/mode","panel") ;
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+				}
+		    }else {
 			    if(isPortrait==0)
 			    {
 				if (fd_ppmgr >= 0) 	write(fd_ppmgr, "0", strlen("0"));
@@ -276,7 +284,16 @@ int freeScale(int mode) {
 					amsysfs_set_sysfs_str("/sys/class/video/disable_video","2");
 				
 			}else if(isSingleDisplay == 1){
-			    amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+				if(isPortrait == 0){
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode","1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+					amsysfs_set_sysfs_str("/sys/class/display/mode","480p");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis",osd_str);
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","20 10 700 470");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+				}else{
+			    		amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/free_scale","0x0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_clone","0");
@@ -288,6 +305,8 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_update_pan","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","0");
 				amsysfs_set_sysfs_str("/sys/class/display/mode","480p");
+				}
+
 			}
 			else
 			{
@@ -410,7 +429,16 @@ int freeScale(int mode) {
 				if ((fd_video >= 0)&&(fd_ppmgr >= 0))	
 					amsysfs_set_sysfs_str("/sys/class/video/disable_video","2");
 			}else if(isSingleDisplay == 1){
-			    amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+				if(isPortrait == 0){
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode","1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+					amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis",osd_str);
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","40 15 1240 705");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+				}else{
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/free_scale","0x0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_clone","0");
@@ -423,6 +451,7 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_update_pan","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","0");
 				amsysfs_set_sysfs_str("/sys/class/display/mode","720p");
+				}
 			}
 			else
 			{
@@ -552,7 +581,16 @@ int freeScale(int mode) {
 				if ((fd_video >= 0)&&(fd_ppmgr >= 0)) 	
 					amsysfs_set_sysfs_str("/sys/class/video/disable_video","2");
 			}else if(isSingleDisplay == 1){
-			    amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+				if(isPortrait == 0){
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/freescale_mode","1");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
+					amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale_axis",osd_str);
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/window_axis","40 20 1880 1060");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/free_scale","0x10001");
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","0");
+				}else{
+					amsysfs_set_sysfs_str("/sys/class/graphics/fb0/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/free_scale","0x0");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_clone","0");
@@ -565,6 +603,7 @@ int freeScale(int mode) {
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/ver_update_pan","1");
 				amsysfs_set_sysfs_str("/sys/class/graphics/fb1/blank","0");
 				amsysfs_set_sysfs_str("/sys/class/display/mode","1080p");
+				}
 			}
 			else
 			{
