@@ -226,8 +226,11 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                     int dualEnabled = Settings.System.getInt(context.getContentResolver(),
                                             Settings.System.HDMI_DUAL_DISP, 1);
                     HdmiSwitch.setDualDisplayStatic(true, (dualEnabled == 1));
-                } 
-                HdmiSwitch.setFb0Blank("0");            
+                }
+                if ( !(SystemProperties.getBoolean("sys.sf.hotplug", false)
+                    /*&& SystemProperties.getBoolean("ro.module.singleoutput", false)*/)){
+                    HdmiSwitch.setFb0Blank("0");
+                }
             }
         }
     }    

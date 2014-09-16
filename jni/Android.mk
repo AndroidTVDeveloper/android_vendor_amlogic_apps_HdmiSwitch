@@ -16,6 +16,13 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+ifeq ($(TARGET_EXTERNAL_DISPLAY),true)
+LOCAL_CFLAGS += -DWITH_EXTERNAL_DISPLAY
+ifeq ($(TARGET_SINGLE_EXTERNAL_DISPLAY_USE_FB1),true)
+LOCAL_CFLAGS += -DSINGLE_EXTERNAL_DISPLAY_USE_FB1
+endif
+endif
+
 LOCAL_MODULE    := libhdmiswitchjni
 LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := hdmiswitchjni.c
