@@ -55,8 +55,9 @@ public class HdmiDelayedService extends Service {
 	
     private void onDelayedProcess() {
         HdmiSwitch.setMode("panel");
-        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)
-            || SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {                        
+        if ((SystemProperties.getBoolean("ro.vout.dualdisplay2", false)
+            || SystemProperties.getBoolean("ro.vout.dualdisplay3", false))
+            && !SystemProperties.getBoolean("ro.real.externaldisplay", false)) {                        
             int dualEnabled = Settings.System.getInt(mContext.getContentResolver(),
                                     Settings.System.HDMI_DUAL_DISP, 1);
             HdmiSwitch.setDualDisplayStatic(false, (dualEnabled == 1));

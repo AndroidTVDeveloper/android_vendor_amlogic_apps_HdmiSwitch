@@ -354,7 +354,7 @@ public class HdmiSwitch extends Activity {
     	}
     	
     	return list;
- 	} 
+} 
     /** updateListDisplay */
     private void updateListDisplay() {
 //        /* update hdmi_info_str*/
@@ -865,7 +865,6 @@ public class HdmiSwitch extends Activity {
             Log.w(TAG, "setDualDisplay, camera is busy");
             return;
         }    
-        
         if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {        
             if (hdmiPlugged) {
                 writeSysfs(VIDEO2_CTRL_PATH, "0");
@@ -913,7 +912,7 @@ public class HdmiSwitch extends Activity {
                 //writeSysfs(REG_PATH, "0");            
             }   
             }     
-        } 	
+        }
     }
     
     private int getDualDisplayState() {
@@ -929,7 +928,6 @@ public class HdmiSwitch extends Activity {
             Log.w(TAG, "setDualDisplay, camera is busy");
             return;
         }    
-        
         if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) { 
             if (hdmiPlugged) {
                 writeSysfs(VIDEO2_CTRL_PATH, "0");
@@ -1399,26 +1397,28 @@ public class HdmiSwitch extends Activity {
     				finish();                   
                     break;
                 }
-                if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                {
                     boolean hdmiPlugged = !getCurMode().equals("panel");
-                    if (hdmiPlugged) setFb0Blank("1");
-                    setDualDisplay(hdmiPlugged);
+                    if (hdmiPlugged){
+                        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                            setFb0Blank("1");
+                        }  
+                        if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
+                            writeSysfs(FB2_BLANK_PATH, "1");
+                        }                       
+                    }
+                    if (!SystemProperties.getBoolean("ro.real.externaldisplay", false))
+                        setDualDisplay(hdmiPlugged);
                     if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
                 }
-                if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
-                    boolean hdmiPlugged = !getCurMode().equals("panel");
-                    if (hdmiPlugged) writeSysfs(FB2_BLANK_PATH, "1");
-                    setDualDisplay(hdmiPlugged);
-                    if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
-                }                                           
-				notifyModeChanged();
-				updateListDisplay();					
-				if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
-    				if (!getCurMode().equals("panel"))
-    					showDialog(CONFIRM_DIALOG_ID);
-    				else
-    					finish();
-				}   
+                notifyModeChanged();
+                updateListDisplay();					
+                if (!SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {
+                	if (!getCurMode().equals("panel"))
+                		showDialog(CONFIRM_DIALOG_ID);
+                	else
+                		finish();
+                }   
 					         	
             	break;	
             	
@@ -1427,21 +1427,23 @@ public class HdmiSwitch extends Activity {
     				notifyModeChanged();
     				updateListDisplay();
                     break;
-                }            
-                if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                }
+                {
                     boolean hdmiPlugged = !getCurMode().equals("panel");
-                    if (hdmiPlugged) setFb0Blank("1");
-                    setDualDisplay(hdmiPlugged);
+                    if (hdmiPlugged){
+                        if (SystemProperties.getBoolean("ro.vout.dualdisplay2", false)) {
+                            setFb0Blank("1");
+                        }  
+                        if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
+                            writeSysfs(FB2_BLANK_PATH, "1");
+                        }                       
+                    }
+                    if (!SystemProperties.getBoolean("sys.sf.hotplug", false))
+                        setDualDisplay(hdmiPlugged);
                     if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
-                }  
-                if (SystemProperties.getBoolean("ro.vout.dualdisplay3", false)) {
-                    boolean hdmiPlugged = !getCurMode().equals("panel");
-                    if (hdmiPlugged) writeSysfs(FB2_BLANK_PATH, "1");;
-                    setDualDisplay(hdmiPlugged);
-                    if (hdmiPlugged) mProgressHandler.sendEmptyMessageDelayed(4, 1000); 
-                }                                      
-				notifyModeChanged();
-				updateListDisplay();
+                }
+                notifyModeChanged();
+                updateListDisplay();
           	
             	break;
             	
