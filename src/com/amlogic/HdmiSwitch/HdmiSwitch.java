@@ -251,16 +251,16 @@ public class HdmiSwitch extends Activity {
         	return;
         }
         
-    	hdmi_stat_old = isHdmiConnected(); 
     	mProgress2 = 0;
-    	mProgressHandler.sendEmptyMessageDelayed(1, 1000); 
+    	mProgressHandler.sendEmptyMessageDelayed(1, 100); 
     }
     
     /** onPause() */
     @Override
     public void onPause() {
     	super.onPause();
-    	
+        
+    	hdmi_stat_old = isHdmiConnected(); 
     	mProgress = STOP_PROGRESS;  
     	mProgress2 = STOP_PROGRESS;
     }
