@@ -8,14 +8,17 @@
 extern "C" {
 #endif
 
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleSetModeJni
-  (JNIEnv *, jobject ,jint);
+JNIEXPORT jint JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleSetModeJni(JNIEnv *, jobject ,jint);
+
+JNIEXPORT jboolean JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_isExternalSinglePortraitDisplayJni(JNIEnv *, jobject);
+
+JNIEXPORT jint JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_DisableFreeScaleJni(JNIEnv *, jobject ,jint);  
   
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_DisableFreeScaleJni
-  (JNIEnv *, jobject ,jint);  
-  
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_EnableFreeScaleJni
-  (JNIEnv *, jobject ,jint);  
+JNIEXPORT jint JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_EnableFreeScaleJni(JNIEnv *, jobject ,jint);  
     
 #ifdef __cplusplus
 }

@@ -272,6 +272,9 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                     HdmiSwitch.setMode("panel");
                     Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
                     it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
+                    if (HdmiSwitch.isExternalSinglePortraitDisplayJni()){
+                        it.putExtra("videoplayer.need.pause", false);
+                    }
                     context.sendStickyBroadcast(it);
                     if ((SystemProperties.getBoolean("ro.vout.dualdisplay2", false) 
                             || SystemProperties.getBoolean("ro.vout.dualdisplay3", false))

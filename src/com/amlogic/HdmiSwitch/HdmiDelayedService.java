@@ -64,6 +64,9 @@ public class HdmiDelayedService extends Service {
         }
         Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
         it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, false);
+        if (HdmiSwitch.isExternalSinglePortraitDisplayJni()){
+            it.putExtra("videoplayer.need.pause", false);
+        }
         mContext.sendStickyBroadcast(it);
     }	
 	

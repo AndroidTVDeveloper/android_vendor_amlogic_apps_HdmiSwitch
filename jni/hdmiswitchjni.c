@@ -44,6 +44,26 @@ int amsysfs_set_sysfs_str(const char *path, const char *val)
     return -1;
 }
 
+static unsigned char isExternalSinglePortraitDisplay(){
+    char value[128];
+    unsigned char is_single = 0;
+    unsigned char is_portrait = 0;
+
+#ifdef SINGLE_EXTERNAL_DISPLAY_USE_FB1
+    memset(value,0,128);
+    property_get("ro.module.singleoutput",value,"false");
+    if(strstr(value,"true")){
+        is_single = 1;
+    }
+    memset(value, 0 ,128);
+    property_get("ro.screen.portrait", value, "false");
+    if(strstr(value,"true")){
+        is_portrait = 1;
+    }
+#endif
+
+    return (is_single && is_portrait);
+}
 
 static lastDisplayMode=0;
 
@@ -1068,10 +1088,16 @@ exit:
 }
 
 
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleSetModeJni( JNIEnv * env,
-																									jobject thiz, jint mode )
+JNIEXPORT jint JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleSetModeJni( JNIEnv * env, jobject thiz, jint mode )
 {	
-		return freeScale(mode);
+    return freeScale(mode);
+}						
+
+JNIEXPORT jboolean JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_isExternalSinglePortraitDisplayJni( JNIEnv * env, jobject thiz)
+{	
+    return isExternalSinglePortraitDisplay();
 }						
 
 #define log_print LOGI
@@ -1459,25 +1485,27 @@ exit:
 
 }
 																	
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_DisableFreeScaleJni( JNIEnv * env,
-																									jobject thiz, jint mode )
+JNIEXPORT jint JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_DisableFreeScaleJni( JNIEnv * env, jobject thiz, jint mode )
 {	
-		return DisableFreeScale(mode);
+    return DisableFreeScale(mode);
 }
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_EnableFreeScaleJni( JNIEnv * env,
-																									jobject thiz, jint mode )
+
+JNIEXPORT jint JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_EnableFreeScaleJni( JNIEnv * env, jobject thiz, jint mode )
 {	
-		return EnableFreeScale(mode);
+    return EnableFreeScale(mode);
 }
 
 
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleForDisplay2Jni( JNIEnv * env,
-																									jobject thiz, jint mode )
+JNIEXPORT jint JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_freeScaleForDisplay2Jni( JNIEnv * env, jobject thiz, jint mode )
 {	
-		return FreeScaleForDisplay2(mode);
+    return FreeScaleForDisplay2(mode);
 }
-JNIEXPORT jint JNICALL Java_com_amlogic_HdmiSwitch_HdmiSwitch_DisableFreeScaleForDisplay2Jni( JNIEnv * env,
-																									jobject thiz, jint mode )
+
+JNIEXPORT jint JNICALL 
+Java_com_amlogic_HdmiSwitch_HdmiSwitch_DisableFreeScaleForDisplay2Jni( JNIEnv * env, jobject thiz, jint mode )
 {	
-		return DisableFreeScaleFB2(mode);
+    return DisableFreeScaleFB2(mode);
 }

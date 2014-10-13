@@ -57,7 +57,8 @@ public class HdmiSwitch extends Activity {
 	public native static int freeScaleForDisplay2Jni(int mode);
 	public native static int DisableFreeScaleJni(int mode);
 	public native static int EnableFreeScaleJni(int mode);
-	public native static int DisableFreeScaleForDisplay2Jni(int mode);	
+	public native static int DisableFreeScaleForDisplay2Jni(int mode);
+    	public native static boolean isExternalSinglePortraitDisplayJni();
 	
 	public static final String DISP_CAP_PATH = "/sys/class/amhdmitx/amhdmitx0/disp_cap";
 	public static final String MODE_PATH = "/sys/class/display/mode";
@@ -598,15 +599,15 @@ public class HdmiSwitch extends Activity {
     	    return 0;
     	}    	
     	
-    	if (!modeStr.equals("panel")) {
-    		if (!isHdmiConnected())
-    			return 0;
-    	}else {
-    	//if mode is reset to 'panel',we need to reset window_axis to zero avoid libplayer changing video/axis 
-    	writeSysfs(WINDOW_AXIS,"0 0 0 0");
-    	}
-    	if (modeStr.equals(getCurMode()))
-    		return 0; 
+    if (!modeStr.equals("panel")) {
+    	if (!isHdmiConnected())
+    		return 0;
+    }else if (!isExternalSinglePortraitDisplayJni()){
+    //if mode is reset to 'panel',we need to reset window_axis to zero avoid libplayer changing video/axis 
+        writeSysfs(WINDOW_AXIS,"0 0 0 0");
+    }
+    if (modeStr.equals(getCurMode()))
+    	return 0; 
     	
 	    if (SystemProperties.getBoolean("ro.vout.dualdisplay", false)) {    		
     		try {
@@ -674,8 +675,10 @@ public class HdmiSwitch extends Activity {
     			//nap(1);
     			disableVideo(false);
     			setBrightness(briStr);
-    			writeSysfs(REQUEST2XSCALE_PATH, "2");
-    			//setFb0Blank("0");
+                    if (!isExternalSinglePortraitDisplayJni()){
+                        writeSysfs(REQUEST2XSCALE_PATH, "2");
+                    }
+                    //setFb0Blank("0");
     		}
     		else if (modeStr.equals("480p")) {
     		    setFb0Blank("1");	
