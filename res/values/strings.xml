@@ -24,6 +24,25 @@
     
     <string name="dialog_title">Apply this mode?</string>
     <string name="dialog_str_ok">OK</string>
-    <string name="dialog_str_cancel">Cancel</string>    
+    <string name="dialog_str_cancel">Cancel</string>   
+    
+    <!-- Cling for the first running -->
+    <string name="Cling_name">Hdmi Instructions!</string>
+    <!-- The title text -->
+    <string name="hdmi_cling_title">"Please Make yourself at home!\nHDMI instructions are as follows:"</string>
+    <string name="hdmi_cursor">"First thing you should known is that the above ring represents the cursor.\nMore important is that you should put you panel orientation in landscape! </string>
+    <!--  The description of the click (touch) operation -->
+    <string name="hdmi_cling_click">"\nIt\'s a click event when you touch the panel screen and leave it."</string>
+    <!-- The description of how to use the single finger move -->
+    <string name="hdmi_cling_move_finger">You can move the cursor by sliding with single finger on the panel.</string>
+    <!-- The description of how to use the double fingers move -->
+    <string name="hdmi_cling_next">"Please click the \"next\" button to continue!\n\n\n"</string>
+    <!-- The description of how to use the double fingers move -->
+    <string name="hdmi_cling_move_fingers">"\nIt's a dragging event if you slide the panel screen with two finger."</string>
+    <string name="hdmi_cling_dismiss">"Please click the OK button, Have fun!\n\n\n"</string>
+    <!-- The text on the button to move next -->
+    <string name="cling_next">next</string>
+    <!-- The text on the button to dismiss a cling  -->
+    <string name="cling_dismiss">OK</string>
     
 </resources>

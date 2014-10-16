@@ -24,6 +24,25 @@
     
     <string name="dialog_title">应用该模式?</string>
     <string name="dialog_str_ok">确认</string>
-    <string name="dialog_str_cancel">取消</string>    
+    <string name="dialog_str_cancel">取消</string>  
     
+    <!-- HDMI Cling related -->
+   <!-- Cling for the first running -->
+    <string name="Cling_name">Hdmi 操作说明!</string>
+    <!-- The title text -->
+    <string name="hdmi_cling_title">"HDMI 操作说明如下:"</string>
+    <string name="hdmi_cursor">"屏幕上的圆环代表光标，移动光标时请将平板横放!"</string>
+    <!--  The description of the click (touch) operation -->
+    <string name="hdmi_cling_click">"点击平板是一个单击事件."</string>
+    <!-- The description of how to use the single finger move -->
+    <string name="hdmi_cling_move_finger">单指滑动平板屏幕可以移动光标.</string>
+    <!-- The description of how to use the double fingers move -->
+    <string name="hdmi_cling_next">“请将光标移动至此，点击 \"next\" 按钮!\n\n\n"</string>
+    <!-- The description of how to use the double fingers move -->
+    <string name="hdmi_cling_move_fingers">"\n双指滑动平板屏幕是拖拽事件."</string>
+    <string name="hdmi_cling_dismiss">"请点击\"ok\"按钮!\n\n\n"</string>
+    <!-- The text on the button to move next -->
+    <string name="cling_next">next</string>
+    <!-- The text on the button to dismiss a cling  -->
+    <string name="cling_dismiss">OK</string>
 </resources>

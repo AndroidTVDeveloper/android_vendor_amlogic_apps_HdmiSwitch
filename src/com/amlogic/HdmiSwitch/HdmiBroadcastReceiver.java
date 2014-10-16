@@ -26,6 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import android.hardware.input.IInputManager;
 import android.app.SystemWriteManager;
+import android.content.SharedPreferences;
 public class HdmiBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = "HdmiBroadcastReceiver";
 
@@ -130,6 +131,8 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
     }
     
     private void onHdmiPlugged(Context context) {
+    	SharedPreferences prefs = context.getSharedPreferences(HdmiSwitch.PRESS_KEY, Context.MODE_PRIVATE);
+
         if (SystemProperties.getBoolean("ro.vout.dualdisplay4", false)) {
             if (HdmiSwitch.getCurMode().equals("null")) {
                 int autoSwitchEnabled = Settings.System.getInt(context.getContentResolver(),
@@ -159,6 +162,20 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                     /// send BACK key to stop other player
                     sendKeyEvent(KeyEvent.KEYCODE_HOME);
                 }                
+
+                // show the cling when it auto connected
+                if (SystemProperties.getBoolean("ro.module.singleoutput",false)) {
+		        	Log.v(TAG, "singleoutput ok, dualdispaly4 false");
+                	if (!prefs.getBoolean(HdmiCling.CLING_DISMISS_KEY_720P, false)) {
+                		Intent i = new Intent(context, ShowCling.class);
+                		i.putExtra("on_which", HdmiCling.CLING_DISMISS_KEY_720P);
+                		i.putExtra("which_cling", "first");
+                		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                		context.startActivity(i);
+                	}
+                } else {
+			        Log.v(TAG,"singleoutput false, display4 fasle");
+		        }
                   
                 HdmiSwitch.setMode("720p");
                 Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
@@ -217,6 +234,21 @@ public class HdmiBroadcastReceiver extends BroadcastReceiver {
                     sendKeyEvent(KeyEvent.KEYCODE_HOME);
                 }
                 Log.w(TAG, "onHdmiPlugged 720p");
+
+                // show the cling when it auto connected
+                if (SystemProperties.getBoolean("ro.module.singleoutput",false)) {
+			        Log.v(TAG, "singleoutput ok, dualdispaly true");
+                	if (!prefs.getBoolean(HdmiCling.CLING_DISMISS_KEY_720P, false)) {
+                		Intent i = new Intent(context, ShowCling.class);
+                		i.putExtra("on_which", HdmiCling.CLING_DISMISS_KEY_720P);
+                		i.putExtra("which_cling", "first");
+                		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                		context.startActivity(i);
+                	}
+                } else {
+			        Log.v(TAG, "singleouput false, dispaly true");
+		        }
+
                 HdmiSwitch.setMode("720p");
                 Intent it = new Intent(WindowManagerPolicy.ACTION_HDMI_PLUGGED);
                 it.putExtra(WindowManagerPolicy.EXTRA_HDMI_PLUGGED_STATE, true);

@@ -19,6 +19,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />                
             </intent-filter>
         </activity>
+               
+        <activity android:name=".ShowCling"
+            	  android:label="@string/Cling_name"
+            	  android:theme="@style/transparent">   
+            
+            <intent-filter>           
+                <action android:name="com.amlogic.HdmiSwitch.action.SHOW_CLING"/>
+                <category android:name="android.intent.category.DEFAULT" />                
+            </intent-filter>            
+        </activity>      
 	 <receiver android:name=".HdmiBroadcastReceiver">
 		 <intent-filter>
 			<action android:name="android.intent.action.BOOT_COMPLETED"/>

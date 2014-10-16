@@ -11,12 +11,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,10 +32,12 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -114,6 +122,7 @@ public class HdmiSwitch extends Activity {
         super.onCreate(savedInstanceState);
 //        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.main);
+        
 //        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_layout); 
         
 		//PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
@@ -1656,6 +1665,70 @@ public class HdmiSwitch extends Activity {
                 EnableFreeScaleJni(7);
         }    	
         return 0;                     
+    }
+    
+
+    //Cling Related
+    public static final String PRESS_KEY = "com.amlogic.HdmiSwitch.prefs";
+    private static String SHOW_CLING="com.amlogic.HdmiSwitch.action.SHOW_CLING";
+    
+    private boolean isClingsEnabled() {
+        // disable clings when running in a test harness
+        if(ActivityManager.isRunningInTestHarness()) return false;
+        return true;
+    }    
+
+    private void removeCling(int id) {
+        final View cling = findViewById(id);
+        if (cling != null) {
+            final ViewGroup parent = (ViewGroup) cling.getParent();
+            parent.post(new Runnable() {
+                
+                public void run() {
+                    parent.removeView(cling);
+                }
+            });
+        }
+    }
+  
+    public int showFirstRunHdmiCling(String mode) {
+        // chose the key according to the mod
+    	String key;
+    	if (mode.equals("first")) {
+    		key = HdmiCling.CLING_DISMISS_FIRST;
+    	} else { 
+		if (!isHdmiConnected()) {
+			return -1;
+		}
+		if (mode.equals("480p")) {
+    			key = HdmiCling.CLING_DISMISS_KEY_480P;
+    		} else if (mode.equals("720p")) {
+    			key = HdmiCling.CLING_DISMISS_KEY_720P;
+    		} else if (mode.equals("1080i")) {
+    			key = HdmiCling.CLING_DISMISS_KEY_1080I;
+    		} else if (mode.equals("1080p")) {
+    			key = HdmiCling.CLING_DISMISS_KEY_1080P;
+    		} else 
+    			return -1;
+	}
+
+	if (mode.equals(getCurMode()))
+		return -1;
+
+    	SharedPreferences prefs = getSharedPreferences(PRESS_KEY, Context.MODE_PRIVATE);
+    	if (isClingsEnabled() && !prefs.getBoolean(key, false)) {
+    	//   Intent clingIntent = new Intent();
+    	//	clingIntent.setAction(HdmiSwitch.SHOW_CLING); 
+    		Intent clingIntent = new Intent(getApplicationContext(),ShowCling.class);
+    		clingIntent.putExtra("on_which", key);
+    		clingIntent.putExtra("which_cling", "first");
+    		startActivity(clingIntent);    		
+        } else {
+        	removeCling(R.id.hdmi_cling);
+        }
+
+	return 1;
+
     }
     
 }
