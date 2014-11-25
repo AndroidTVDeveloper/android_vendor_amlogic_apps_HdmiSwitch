@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
- <!-- Cling specific attributes. These attributes are used to customize
+  <!-- Cling specific attributes. These attributes are used to customize
          the cling in XML files. -->
-    <declare-styleable name="Cling">
-        <!-- Used to identify how to draw the cling bg -->
-        <attr name="drawIdentifier" format="string"  />
-    </declare-styleable>
-    
+  <declare-styleable name="Cling">
+    <!-- Used to identify how to draw the cling bg -->
+    <attr name="drawIdentifier" format="string" />
+  </declare-styleable>
 </resources>
