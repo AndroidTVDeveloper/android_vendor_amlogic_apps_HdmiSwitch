@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (c) 2014 Amlogic, Inc. All rights reserved.
+ *
+ * This source code is subject to the terms and conditions defined in the
+ * file 'LICENSE' which is part of this source code package.
+ *
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.droidlogic.HdmiSwitch" android:versionCode="1" android:versionName="4.0" android:sharedUserId="android.uid.system">
   <uses-permission android:name="android.permission.BROADCAST_STICKY" />
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

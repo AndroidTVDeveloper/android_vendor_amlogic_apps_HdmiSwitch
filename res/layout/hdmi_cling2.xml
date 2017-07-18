@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (c) 2014 Amlogic, Inc. All rights reserved.
+ *
+ * This source code is subject to the terms and conditions defined in the
+ * file 'LICENSE' which is part of this source code package.
+ *
+-->
 <com.droidlogic.HdmiSwitch.HdmiCling xmlns:android="http://schemas.android.com/apk/res/android" xmlns:hdmicling="http://schemas.android.com/apk/res/com.droidlogic.HdmiSwitch" android:id="@+id/hdmi_cling2" android:layout_width="fill_parent" android:layout_height="fill_parent" hdmicling:drawIdentifier="hdmi_landscape">
   <!--  android:visibility="gone" -->
   <!-- launcher:drawIdentifier="workspace_landscape" -->
